@@ -106,8 +106,10 @@ public class DefaultBeanDefinitionDocumentReader implements BeanDefinitionDocume
 		this.readerContext = readerContext;
 
 		logger.debug("Loading bean definitions");
+		//获取根节点
 		Element root = doc.getDocumentElement();
 
+		//开始注册
 		doRegisterBeanDefinitions(root);
 	}
 
@@ -118,8 +120,13 @@ public class DefaultBeanDefinitionDocumentReader implements BeanDefinitionDocume
 	 * @see #setEnvironment
 	 */
 	protected void doRegisterBeanDefinitions(Element root) {
+		//处理profile属性
+		/*
+		 <beans profile="dev"></beans>
+		 */
 		String profileSpec = root.getAttribute(PROFILE_ATTRIBUTE);
 		if (StringUtils.hasText(profileSpec)) {
+			//如果定义了profile属性, 则environment 不能为空
 			Assert.state(this.environment != null, "environment property must not be null");
 			String[] specifiedProfiles = StringUtils.tokenizeToStringArray(profileSpec, BeanDefinitionParserDelegate.MULTI_VALUE_ATTRIBUTE_DELIMITERS);
 			if (!this.environment.acceptsProfiles(specifiedProfiles)) {
@@ -133,11 +140,22 @@ public class DefaultBeanDefinitionDocumentReader implements BeanDefinitionDocume
 		// the new (child) delegate with a reference to the parent for fallback purposes,
 		// then ultimately reset this.delegate back to its original (parent) reference.
 		// this behavior emulates a stack of delegates without actually necessitating one.
+		/*
+		 * 任何嵌套的<beans>元素都将导致此方法中的递归。
+		 * 为了正确地传播和保存<beans>default-*属性，请跟踪当前（父）委托，它可能为null。
+		 * 创建一个新的（子）委托，引用父委托以用于回退，然后最终重置这个。
+		 * 委托人返回其原始（父）引用。这种行为模拟了一堆委托，实际上并不需要一个。
+		 */
+		//专门处理解析
 		BeanDefinitionParserDelegate parent = this.delegate;
 		this.delegate = createHelper(readerContext, root, parent);
 
+		//解析前处理，留给子类实现
 		preProcessXml(root);
+
 		parseBeanDefinitions(root, this.delegate);
+
+		//解析后处理，留给子类实现
 		postProcessXml(root);
 
 		this.delegate = parent;
@@ -168,19 +186,29 @@ public class DefaultBeanDefinitionDocumentReader implements BeanDefinitionDocume
 	/**
 	 * Parse the elements at the root level in the document:
 	 * "import", "alias", "bean".
+	 *
+	 * Spring的XML配置里有两大类bean的声明：
+	 * 1. 默认的<bean id = "test" class="com.lin.DemoTest" />
+	 * 2. <tx:annotation-driven/>
+	 *
 	 * @param root the DOM root element of the document
 	 */
 	protected void parseBeanDefinitions(Element root, BeanDefinitionParserDelegate delegate) {
+		//对bean 处理
 		if (delegate.isDefaultNamespace(root)) {
 			NodeList nl = root.getChildNodes();
 			for (int i = 0; i < nl.getLength(); i++) {
 				Node node = nl.item(i);
 				if (node instanceof Element) {
 					Element ele = (Element) node;
+					//判断是否是默认的命名空间
 					if (delegate.isDefaultNamespace(ele)) {
+						//根节点或者子节点如果是默认命名空间
+						//对bean的处理
 						parseDefaultElement(ele, delegate);
 					}
 					else {
+						//对bean的处理
 						delegate.parseCustomElement(ele);
 					}
 				}
@@ -191,16 +219,30 @@ public class DefaultBeanDefinitionDocumentReader implements BeanDefinitionDocume
 		}
 	}
 
+	/**
+	 * 对 4种 默认命名标签进行解析
+	 * 1. import
+	 * 2. alias
+	 * 3. bean
+	 * 4. beans
+	 *
+	 * @param ele
+	 * @param delegate
+	 */
 	private void parseDefaultElement(Element ele, BeanDefinitionParserDelegate delegate) {
+		//对import标签进行处理
 		if (delegate.nodeNameEquals(ele, IMPORT_ELEMENT)) {
 			importBeanDefinitionResource(ele);
 		}
+		//对alias标签进行处理
 		else if (delegate.nodeNameEquals(ele, ALIAS_ELEMENT)) {
 			processAliasRegistration(ele);
 		}
+		//对bean标签进行处理
 		else if (delegate.nodeNameEquals(ele, BEAN_ELEMENT)) {
 			processBeanDefinition(ele, delegate);
 		}
+		//对beanss签进行处理
 		else if (delegate.nodeNameEquals(ele, NESTED_BEANS_ELEMENT)) {
 			// recurse
 			doRegisterBeanDefinitions(ele);
@@ -306,10 +348,21 @@ public class DefaultBeanDefinitionDocumentReader implements BeanDefinitionDocume
 	/**
 	 * Process the given bean element, parsing the bean definition
 	 * and registering it with the registry.
+	 *
+	 * 对bean标签进行处理
+	 *
 	 */
 	protected void processBeanDefinition(Element ele, BeanDefinitionParserDelegate delegate) {
+		/*
+		  经过这个方法,
+		  bdHolder已经包含了我们配置文件中配置的各种属性,
+		  例如：class \ name \ id \ alias 之类的属性
+		 */
 		BeanDefinitionHolder bdHolder = delegate.parseBeanDefinitionElement(ele);
 		if (bdHolder != null) {
+			/*
+			   若默认标签的子节点下再有自定义属性，还需要再次对自定义标签进行解析
+			 */
 			bdHolder = delegate.decorateBeanDefinitionIfRequired(ele, bdHolder);
 			try {
 				// Register the final decorated instance.
