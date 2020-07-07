@@ -149,13 +149,16 @@ public class BeanDefinitionReaderUtils {
 		// Register bean definition under primary name.
 		// 使用beanName 做唯一标识注册
 		String beanName = definitionHolder.getBeanName();
-		
+
+		//1. 通过beanName 注册
 		registry.registerBeanDefinition(beanName, definitionHolder.getBeanDefinition());
 
 		// Register aliases for bean name, if any.
+		//注册所有的别名
 		String[] aliases = definitionHolder.getAliases();
 		if (aliases != null) {
 			for (String aliase : aliases) {
+				//2. 通过别名注册
 				registry.registerAlias(beanName, aliase);
 			}
 		}

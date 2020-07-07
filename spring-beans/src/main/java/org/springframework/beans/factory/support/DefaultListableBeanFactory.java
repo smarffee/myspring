@@ -615,6 +615,20 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 	// Implementation of BeanDefinitionRegistry interface
 	//---------------------------------------------------------------------
 
+	/**
+	 * 注册beanDefinition
+	 *
+	 * 1. 对AbstractBeanDefinition 进行校验。
+	 * 在解析xml时，我们提过校验，但是此校验非彼校验，之前是针对xml的格式进行校验，
+	 * 而此时的校验是针对AbstractBeanDefinition 的 methodOverrides 属性
+	 * 2. 对beanName 已经注册过的情况处理。如果设置了不允许bean的覆盖，则抛异常。否则直接覆盖。
+	 * 3. 加入map缓存。
+	 * 4. 清除解析之前留下的对应的beanName的缓存。
+	 *
+	 * @param beanName the name of the bean instance to register
+	 * @param beanDefinition definition of the bean instance to register
+	 * @throws BeanDefinitionStoreException
+	 */
 	public void registerBeanDefinition(String beanName, BeanDefinition beanDefinition)
 			throws BeanDefinitionStoreException {
 
@@ -623,6 +637,11 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 
 		if (beanDefinition instanceof AbstractBeanDefinition) {
 			try {
+				/**
+				 * 注册前的最后一次校验，这里的校验不同于之前的XML文件校验
+				 * 主要是对于AbstractBeanDefinition 属性中的methodOverrides 校验，
+				 * 校验methodOverrides 是否与工厂方法并存或者methodOverrides 对应的方法根本不存在
+				 */
 				((AbstractBeanDefinition) beanDefinition).validate();
 			}
 			catch (BeanDefinitionValidationException ex) {
@@ -631,9 +650,14 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 			}
 		}
 
+		//因为 beanDefinitionMap 是全局变量，这里定会存在并发访问的情况
 		synchronized (this.beanDefinitionMap) {
+
 			Object oldBeanDefinition = this.beanDefinitionMap.get(beanName);
+
+			//处理注册已经注册的beanName情况
 			if (oldBeanDefinition != null) {
+				//如果对应的beanName已经注册且在配置中配置了bean 不允许被覆盖，则抛异常
 				if (!this.allowBeanDefinitionOverriding) {
 					throw new BeanDefinitionStoreException(beanDefinition.getResourceDescription(), beanName,
 							"Cannot register bean definition [" + beanDefinition + "] for bean '" + beanName +
@@ -647,12 +671,16 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 				}
 			}
 			else {
+				//记录beanName
 				this.beanDefinitionNames.add(beanName);
 				this.frozenBeanDefinitionNames = null;
 			}
+
+			//注册beanDefinition
 			this.beanDefinitionMap.put(beanName, beanDefinition);
 		}
 
+		//重置所有 beanName 对应的缓存
 		resetBeanDefinition(beanName);
 	}
 
@@ -677,10 +705,14 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 	/**
 	 * Reset all bean definition caches for the given bean,
 	 * including the caches of beans that are derived from it.
+	 *
+	 * 重置给定bean的所有bean定义缓存，包括从该bean派生的bean的缓存。
+	 *
 	 * @param beanName the name of the bean to reset
 	 */
 	protected void resetBeanDefinition(String beanName) {
 		// Remove the merged bean definition for the given bean, if already created.
+		// 删除给定bean的合并bean定义（如果已经创建）。
 		clearMergedBeanDefinition(beanName);
 
 		// Remove corresponding bean from singleton cache, if any. Shouldn't usually
