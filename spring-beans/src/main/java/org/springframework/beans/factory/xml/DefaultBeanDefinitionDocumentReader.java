@@ -365,6 +365,7 @@ public class DefaultBeanDefinitionDocumentReader implements BeanDefinitionDocume
 			 */
 			bdHolder = delegate.decorateBeanDefinitionIfRequired(ele, bdHolder);
 			try {
+				//需要对解析后的 bdHolder 进行注册，
 				// Register the final decorated instance.
 				BeanDefinitionReaderUtils.registerBeanDefinition(bdHolder, getReaderContext().getRegistry());
 			}
@@ -373,6 +374,7 @@ public class DefaultBeanDefinitionDocumentReader implements BeanDefinitionDocume
 						bdHolder.getBeanName() + "'", ele, ex);
 			}
 			// Send registration event.
+			//发出响应事件，通知相关的监听器，这个bean已经注册完成了
 			getReaderContext().fireComponentRegistered(new BeanComponentDefinition(bdHolder));
 		}
 	}

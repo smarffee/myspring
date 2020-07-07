@@ -133,31 +133,59 @@ public abstract class AbstractBeanDefinition extends BeanMetadataAttributeAccess
 
 	private volatile Object beanClass;
 
+	//bean的作用范围，对应bean的属性scope
 	private String scope = SCOPE_DEFAULT;
 
+	//是否是单例，来自bean属性的scope
 	private boolean singleton = true;
 
+	//是否是原型，来自bean属性的scope
 	private boolean prototype = false;
 
+	//是否是抽象，对应bean属性的 abstract
 	private boolean abstractFlag = false;
 
+	//是否是延迟加载，对应bean属性的lazy-init
 	private boolean lazyInit = false;
 
+	//自动注入模式，对应bean的autowire
 	private int autowireMode = AUTOWIRE_NO;
 
+	//依赖检查，spring3.0以后弃用这个属性
 	private int dependencyCheck = DEPENDENCY_CHECK_NONE;
 
+	//用来表示一个bean的实例化依靠另一个bean先实例化，对应bean属性depend-on
 	private String[] dependsOn;
 
+	/**
+	 * autowire-candidate 属性设置为false，这样容器在查找自动装配对象时，
+	 * 将不考虑该bean，即它不会作为其他bean自动装配的获选者，但是该bean本身还是可以使用自动装配来注入其他bean
+	 * 对应bean属性autowire-candidate
+	 */
 	private boolean autowireCandidate = true;
 
+	//自动装配时，当出现多个bean获选者时，将作为首选者，对应bean属性primary
 	private boolean primary = false;
 
+	//用于记录Qualifier，对应子元素qualifier
 	private final Map<String, AutowireCandidateQualifier> qualifiers =
 			new LinkedHashMap<String, AutowireCandidateQualifier>(0);
 
+	//允许访问非公开的构造器和方法，程序设置
 	private boolean nonPublicAccessAllowed = true;
 
+	/**
+	 * 是否以一种宽松的方式解析构造函数，默认为true
+	 * 如果为false，则在如下情况
+	 * interface ITest{};
+	 * class ITestImpl implements ITest {};
+	 * class Main {
+	 *     Main(ITest i){}
+	 *     Main(ITestImpl i){}
+	 * }
+	 * 抛出异常，因为spring无法定位哪个构造函数
+	 * 程序设置
+	 */
 	private boolean lenientConstructorResolution = true;
 
 	private ConstructorArgumentValues constructorArgumentValues;

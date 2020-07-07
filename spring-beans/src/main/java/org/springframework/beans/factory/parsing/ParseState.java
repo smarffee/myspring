@@ -23,9 +23,14 @@ import java.util.Stack;
  * a parsing process. {@link Entry entries} are added to the stack at
  * each point during the parse phase in a reader-specific manner.
  *
+ * 基于简单{@link Stack}的结构，用于跟踪解析过程中的逻辑位置。{
+ * @link Entry entries}在解析阶段的每一点以特定于读取器的方式添加到堆栈中。
+ *
  * <p>Calling {@link #toString()} will render a tree-style view of the current logical
  * position in the parse phase. This representation is intended for use in
  * error messages.
+ *
+ * 调用{@link#toString（）}将呈现解析阶段当前逻辑位置的树型视图。此表示用于错误消息。
  *
  * @author Rob Harrop
  * @since 2.0

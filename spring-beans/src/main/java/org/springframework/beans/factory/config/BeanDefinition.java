@@ -25,9 +25,23 @@ import org.springframework.core.AttributeAccessor;
  * constructor argument values, and further information supplied by
  * concrete implementations.
  *
+ * BeanDefinition描述了一个bean实例，它具有属性值、构造函数参数值和具体实现提供的进一步信息。
+ *
  * <p>This is just a minimal interface: The main intention is to allow a
  * {@link BeanFactoryPostProcessor} such as {@link PropertyPlaceholderConfigurer}
  * to introspect and modify property values and other bean metadata.
+ *
+ * 这只是一个最小的接口：
+ * 主要目的是允许{@link BeanFactoryPostProcessor}
+ * 如{@link PropertyPlaceholderConfigurer}来检查和修改属性值和其他bean元数据。
+ *
+ * 在spring中有3种实现
+ * 1. RootBeanDefinition  配置文件中的父bean / 没有父bean的bean
+ * 2. ChildBeanDefinition 配置文件中的子bean
+ * 3. GenericBeanDefinition
+ * 这三种都继承了 AbstractBeanDefinition
+ *
+ * BeanDefinition 是配置文件<bean>元素标签在容器内部的表现形式，主要用来承载bean定义时的各种信息
  *
  * @author Juergen Hoeller
  * @author Rob Harrop
