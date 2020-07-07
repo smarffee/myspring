@@ -1485,10 +1485,29 @@ public class BeanDefinitionParserDelegate {
 		return handler.parse(ele, new ParserContext(this.readerContext, this, containingBd));
 	}
 
+	/**
+	 * 处理bean的属性有自定义标签，
+	 * <bean id="test" class="com.lin.TestUser">
+	 *     <mybean:user username="zhangsan"/>
+	 * </bean>
+	 *
+	 * 当spring中 bean 使用的是默认标签配置，但是其中的子元素却使用了自定义的配置时，下列方法起作用
+	 *
+	 * @param ele
+	 * @param definitionHolder
+	 * @return
+	 */
 	public BeanDefinitionHolder decorateBeanDefinitionIfRequired(Element ele, BeanDefinitionHolder definitionHolder) {
 		return decorateBeanDefinitionIfRequired(ele, definitionHolder, null);
 	}
 
+	/**
+	 *
+	 * @param ele
+	 * @param definitionHolder
+	 * @param containingBd 父类bean，其作用是为了使用父类的scope属性，以备若子类没有scope属性时，默认使用父类的scope属性
+	 * @return
+	 */
 	public BeanDefinitionHolder decorateBeanDefinitionIfRequired(
 			Element ele, BeanDefinitionHolder definitionHolder, BeanDefinition containingBd) {
 
@@ -1496,6 +1515,7 @@ public class BeanDefinitionParserDelegate {
 
 		// Decorate based on custom attributes first.
 		NamedNodeMap attributes = ele.getAttributes();
+		//遍历所有的属性，看看是否有适用于修饰的属性
 		for (int i = 0; i < attributes.getLength(); i++) {
 			Node node = attributes.item(i);
 			finalDefinition = decorateIfRequired(node, finalDefinition, containingBd);
@@ -1503,6 +1523,7 @@ public class BeanDefinitionParserDelegate {
 
 		// Decorate based on custom nested elements.
 		NodeList children = ele.getChildNodes();
+		//遍历所有的子节点，看看是否有使用于修饰的子元素
 		for (int i = 0; i < children.getLength(); i++) {
 			Node node = children.item(i);
 			if (node.getNodeType() == Node.ELEMENT_NODE) {
@@ -1512,13 +1533,26 @@ public class BeanDefinitionParserDelegate {
 		return finalDefinition;
 	}
 
+	/**
+	 * 根据xml元素找到对应的NamespaceHandler，然后进行处理
+	 *
+	 * @param node
+	 * @param originalDef
+	 * @param containingBd
+	 * @return
+	 */
 	private BeanDefinitionHolder decorateIfRequired(
 			Node node, BeanDefinitionHolder originalDef, BeanDefinition containingBd) {
 
+		//获取自定义标签的命名空间
 		String namespaceUri = getNamespaceURI(node);
+
+		//对于非默认标签进行修饰
 		if (!isDefaultNamespace(namespaceUri)) {
+			//根据命名空间找到对应的处理器
 			NamespaceHandler handler = this.readerContext.getNamespaceHandlerResolver().resolve(namespaceUri);
 			if (handler != null) {
+				//进行修饰
 				return handler.decorate(node, originalDef, new ParserContext(this.readerContext, this, containingBd));
 			}
 			else if (namespaceUri != null && namespaceUri.startsWith("http://www.springframework.org/")) {
