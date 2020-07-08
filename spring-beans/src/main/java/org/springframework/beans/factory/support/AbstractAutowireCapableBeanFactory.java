@@ -425,40 +425,59 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 	/**
 	 * Central method of this class: creates a bean instance,
 	 * populates the bean instance, applies post-processors, etc.
+	 *
+	 * 创建bean实例（有可能是FactoryBean）
+	 *
 	 * @see #doCreateBean
 	 */
 	@Override
-	protected Object createBean(final String beanName, final RootBeanDefinition mbd, final Object[] args)
+	protected Object createBean(final String beanName, final RootBeanDefinition rootBeanDefinition, final Object[] args)
 			throws BeanCreationException {
 
 		if (logger.isDebugEnabled()) {
 			logger.debug("Creating instance of bean '" + beanName + "'");
 		}
-		// Make sure bean class is actually resolved at this point.
-		resolveBeanClass(mbd, beanName);
+
+		// Make sure bean class is actually resolved at this point. 确保bean类在这一点上得到了实际的解析。
+		// 1. 锁定class， 根据设置的class 属性或者根据className 来解析Class
+		resolveBeanClass(rootBeanDefinition, beanName);
 
 		// Prepare method overrides.
 		try {
-			mbd.prepareMethodOverrides();
+			//验证及准备覆盖的方法
+			/**
+			 * 2. 对override 属性进行标记及验证
+			 * Spring 配置中存在lookup-method 和 replace-method 的，
+			 * 而这两个配置的加载，其实就是将配置统一存放在 BeanDefinition 的 methodOverrides属性里{@link AbstractBeanDefinition#methodOverrides}。
+			 * 这个函数的操作其实就是针对于这两个配置的
+			 */
+			rootBeanDefinition.prepareMethodOverrides();
 		}
 		catch (BeanDefinitionValidationException ex) {
-			throw new BeanDefinitionStoreException(mbd.getResourceDescription(),
+			throw new BeanDefinitionStoreException(rootBeanDefinition.getResourceDescription(),
 					beanName, "Validation of method overrides failed", ex);
 		}
 
 		try {
 			// Give BeanPostProcessors a chance to return a proxy instead of the target bean instance.
-			Object bean = resolveBeforeInstantiation(beanName, mbd);
+			// 给 BeanPostProcessors 一个机会，返回的代理来替代真正的实例
+			/**
+			 * 对BeanDefinition 中的属性做一些前置工作
+			 * 3. 应用初始化前的后处理器操作，解析指定bean 是否存在初始化前的短路操作
+			 */
+			Object bean = resolveBeforeInstantiation(beanName, rootBeanDefinition);
 			if (bean != null) {
+				//AOP基于这里的判断
 				return bean;
 			}
 		}
 		catch (Throwable ex) {
-			throw new BeanCreationException(mbd.getResourceDescription(), beanName,
+			throw new BeanCreationException(rootBeanDefinition.getResourceDescription(), beanName,
 					"BeanPostProcessor before instantiation of bean failed", ex);
 		}
 
-		Object beanInstance = doCreateBean(beanName, mbd, args);
+		//4. 创建bean
+		Object beanInstance = doCreateBean(beanName, rootBeanDefinition, args);
 		if (logger.isDebugEnabled()) {
 			logger.debug("Finished creating instance of bean '" + beanName + "'");
 		}
@@ -479,6 +498,9 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 	 * @see #instantiateBean
 	 * @see #instantiateUsingFactoryMethod
 	 * @see #autowireConstructor
+	 *
+	 * 常规bean 的创建核心逻辑！！
+	 *
 	 */
 	protected Object doCreateBean(final String beanName, final RootBeanDefinition mbd, final Object[] args) {
 		// Instantiate the bean.
@@ -487,6 +509,7 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 			instanceWrapper = this.factoryBeanInstanceCache.remove(beanName);
 		}
 		if (instanceWrapper == null) {
+			//根据指定bean 使用对应的策略创建新的实例，如：工厂方法，构造函数自动注入，简单初始化
 			instanceWrapper = createBeanInstance(beanName, mbd, args);
 		}
 		final Object bean = (instanceWrapper != null ? instanceWrapper.getWrappedInstance() : null);
@@ -860,6 +883,7 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 	 */
 	protected Object resolveBeforeInstantiation(String beanName, RootBeanDefinition mbd) {
 		Object bean = null;
+		//如果还没有被解析
 		if (!Boolean.FALSE.equals(mbd.beforeInstantiationResolved)) {
 			// Make sure bean class is actually resolved at this point.
 			if (mbd.hasBeanClass() && !mbd.isSynthetic() && hasInstantiationAwareBeanPostProcessors()) {
@@ -884,6 +908,10 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 	 * @return the bean object to use instead of a default instance of the target bean, or <code>null</code>
 	 * @throws BeansException if any post-processing failed
 	 * @see InstantiationAwareBeanPostProcessor#postProcessBeforeInstantiation
+	 *
+	 * 将AbstractBeanDefinition 转换为 BeanWrapper 前的处理。
+	 * 给子类一个修改BeanDefinition 的机会，也就是说，当程序经过这个方法后，bean可能已经不是我们认为的bean了，
+	 * 而是或许成为了一个经过处理的代理bean，可能是通过cglib生成，也可能是通过其他技术生成。
 	 */
 	protected Object applyBeanPostProcessorsBeforeInstantiation(Class beanClass, String beanName)
 			throws BeansException {
@@ -1623,6 +1651,8 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 	 * registered BeanPostProcessors, giving them a chance to post-process the
 	 * object obtained from FactoryBeans (for example, to auto-proxy them).
 	 * @see #applyBeanPostProcessorsAfterInitialization
+	 *
+	 * 从FactoryBean.getObject后的后续处理
 	 */
 	@Override
 	protected Object postProcessObjectFromFactoryBean(Object object, String beanName) {

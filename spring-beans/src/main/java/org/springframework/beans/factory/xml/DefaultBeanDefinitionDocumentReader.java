@@ -153,6 +153,7 @@ public class DefaultBeanDefinitionDocumentReader implements BeanDefinitionDocume
 		//解析前处理，留给子类实现
 		preProcessXml(root);
 
+		//从根节点开始解析
 		parseBeanDefinitions(root, this.delegate);
 
 		//解析后处理，留给子类实现

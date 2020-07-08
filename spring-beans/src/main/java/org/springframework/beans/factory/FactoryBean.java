@@ -43,6 +43,8 @@ package org.springframework.beans.factory;
  * need for internal synchronization other than for purposes of lazy
  * initialization within the FactoryBean itself (or the like).
  *
+ * 用户可以通过实现该接口定制实例化bean的逻辑
+ *
  * @author Rod Johnson
  * @author Juergen Hoeller
  * @since 08.03.2003
@@ -68,6 +70,9 @@ public interface FactoryBean<T> {
 	 * @return an instance of the bean (can be <code>null</code>)
 	 * @throws Exception in case of creation errors
 	 * @see FactoryBeanNotInitializedException
+	 *
+	 *
+	 * 返回由FactoryBean 创建的实例，如果isSingleton返回true，则该实例会放到Spring容器中单实例缓存池中
 	 */
 	T getObject() throws Exception;
 
@@ -89,6 +94,8 @@ public interface FactoryBean<T> {
 	 * @return the type of object that this FactoryBean creates,
 	 * or <code>null</code> if not known at the time of the call
 	 * @see ListableBeanFactory#getBeansOfType
+	 *
+	 * 返回FactoryBean 创建的bean 的类型
 	 */
 	Class<?> getObjectType();
 
@@ -114,6 +121,9 @@ public interface FactoryBean<T> {
 	 * @return whether the exposed object is a singleton
 	 * @see #getObject()
 	 * @see SmartFactoryBean#isPrototype()
+	 *
+	 * 返回由FactoryBean创建的bean实例的作用域是singleton还是propotype
+	 *
 	 */
 	boolean isSingleton();
 
