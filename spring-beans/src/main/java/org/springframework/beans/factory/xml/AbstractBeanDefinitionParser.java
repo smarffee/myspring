@@ -56,7 +56,9 @@ public abstract class AbstractBeanDefinitionParser implements BeanDefinitionPars
 	public static final String NAME_ATTRIBUTE = "name";
 
 	public final BeanDefinition parse(Element element, ParserContext parserContext) {
+		//处理自定义标签的具体过程
 		AbstractBeanDefinition definition = parseInternal(element, parserContext);
+
 		if (definition != null && !parserContext.isNested()) {
 			try {
 				String id = resolveId(element, definition, parserContext);
@@ -70,9 +72,15 @@ public abstract class AbstractBeanDefinitionParser implements BeanDefinitionPars
 				if (StringUtils.hasLength(name)) {
 					aliases = StringUtils.trimArrayElements(StringUtils.commaDelimitedListToStringArray(name));
 				}
+
+				//将BeanDefinition 转换成 BeanDefinitionHolder 并注册
 				BeanDefinitionHolder holder = new BeanDefinitionHolder(definition, id, aliases);
+
+				//开始注册
 				registerBeanDefinition(holder, parserContext.getRegistry());
+
 				if (shouldFireEvents()) {
+					//需要通知监听器则进行处理
 					BeanComponentDefinition componentDefinition = new BeanComponentDefinition(holder);
 					postProcessComponentDefinition(componentDefinition);
 					parserContext.registerComponent(componentDefinition);

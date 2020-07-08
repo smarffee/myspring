@@ -1471,17 +1471,33 @@ public class BeanDefinitionParserDelegate {
 		return TRUE_VALUE.equals(value);
 	}
 
+	/**
+	 * 处理自定义标签定义bean
+	 * @param ele
+	 * @return
+	 */
 	public BeanDefinition parseCustomElement(Element ele) {
 		return parseCustomElement(ele, null);
 	}
 
+	/**
+	 * 处理自定义标签定义bean
+	 *
+	 * @param ele
+	 * @param containingBd 父类的bean, 对顶层元素的解析, 应设置为null
+	 * @return
+	 */
 	public BeanDefinition parseCustomElement(Element ele, BeanDefinition containingBd) {
+		//获取命名空间
 		String namespaceUri = getNamespaceURI(ele);
+		//根据命名空间获取处理器
 		NamespaceHandler handler = this.readerContext.getNamespaceHandlerResolver().resolve(namespaceUri);
 		if (handler == null) {
 			error("Unable to locate Spring NamespaceHandler for XML schema namespace [" + namespaceUri + "]", ele);
 			return null;
 		}
+
+		//用自定义的NamespaceHandler 开始解析
 		return handler.parse(ele, new ParserContext(this.readerContext, this, containingBd));
 	}
 

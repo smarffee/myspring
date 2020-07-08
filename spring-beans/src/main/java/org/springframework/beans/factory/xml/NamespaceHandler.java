@@ -26,10 +26,14 @@ import org.springframework.beans.factory.config.BeanDefinitionHolder;
  * Base interface used by the {@link DefaultBeanDefinitionDocumentReader}
  * for handling custom namespaces in a Spring XML configuration file.
  *
+ * {@link DefaultBeanDefinitionDocumentReader}用于处理springxml配置文件中的自定义命名空间的基接口。
+ *
  * <p>Implementations are expected to return implementations of the
  * {@link BeanDefinitionParser} interface for custom top-level tags and
  * implementations of the {@link BeanDefinitionDecorator} interface for
  * custom nested tags.
+ *
+ * 实现应返回用于自定义顶级标记的{@link BeanDefinitionParser}接口的实现和用于自定义嵌套标记的{@link BeanDefinitionDecorator}接口的实现。
  *
  * <p>The parser will call {@link #parse} when it encounters a custom tag
  * directly under the <code>&lt;beans&gt;</code> tags and {@link #decorate} when

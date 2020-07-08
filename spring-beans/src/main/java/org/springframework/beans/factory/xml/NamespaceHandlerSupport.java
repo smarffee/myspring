@@ -78,6 +78,11 @@ public abstract class NamespaceHandlerSupport implements NamespaceHandler {
 	 * the local name of the supplied {@link Element}.
 	 */
 	private BeanDefinitionParser findParserForElement(Element element, ParserContext parserContext) {
+		/**
+		 * 获取元素名称
+		 * <myname:user id="testbean" userName="aaa" email="bbb" />
+		 * 此时localName 为 user
+		 */
 		String localName = parserContext.getDelegate().getLocalName(element);
 		BeanDefinitionParser parser = this.parsers.get(localName);
 		if (parser == null) {
