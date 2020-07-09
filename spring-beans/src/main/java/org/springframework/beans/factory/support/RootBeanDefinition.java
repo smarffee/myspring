@@ -63,15 +63,29 @@ public class RootBeanDefinition extends AbstractBeanDefinition {
 	boolean isFactoryMethodUnique = false;
 
 	/** Package-visible field for caching the resolved constructor or factory method */
+	/**
+	 * 因为一个bean 对应的类中可能会有多个构造函数，而每个构造函数的参数不同，
+	 * Spring会根据参数及类型去判断，最终会使用哪个构造函数进行实例化，
+	 * 但是，判断的过程是个比较耗性能的步骤，
+	 * 所以采用缓存机制，如果已经解析过，则不需要重复解析，而是直接从该字段去取，
+	 * 否则需要再次解析，并将解析的结果添加至该字段中
+	 */
 	Object resolvedConstructorOrFactoryMethod;
 
 	/** Package-visible field that marks the constructor arguments as resolved */
+	/** 将构造函数参数标记为已解析的包可见字段 **/
+	/** 找到了构造器的参数 **/
 	boolean constructorArgumentsResolved = false;
 
 	/** Package-visible field for caching fully resolved constructor arguments */
+	/** 找到的构造器的参数 **/
 	Object[] resolvedConstructorArguments;
 
 	/** Package-visible field for caching partly prepared constructor arguments */
+	/**
+	 * 已经预存的构造器参数，可能是原始值也可能是最终值，需要经过类型转换器过滤
+	 * 因为，取到的可能是String类型的 "1" ，但是实际上需要是的 int 类型的 1
+	 */
 	Object[] preparedConstructorArguments;
 
 	final Object constructorArgumentLock = new Object();

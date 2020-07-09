@@ -19,6 +19,7 @@ build
 argfile*
 pom.xml
 .idea
+classes
 
 # IDEA metadata and output dirs
 *.iml

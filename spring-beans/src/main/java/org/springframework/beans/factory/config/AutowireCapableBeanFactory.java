@@ -312,6 +312,8 @@ public interface AutowireCapableBeanFactory extends BeanFactory {
 	 * collections
 	 * @return the resolved object, or <code>null</code> if none found
 	 * @throws BeansException in dependency resolution failed
+	 *
+	 * bean实例化以后，按照类型寻找匹配的bean
 	 */
 	Object resolveDependency(DependencyDescriptor descriptor, String beanName,
 			Set<String> autowiredBeanNames, TypeConverter typeConverter) throws BeansException;

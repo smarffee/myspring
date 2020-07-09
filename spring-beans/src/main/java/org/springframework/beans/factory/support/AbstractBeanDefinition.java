@@ -188,6 +188,7 @@ public abstract class AbstractBeanDefinition extends BeanMetadataAttributeAccess
 	 */
 	private boolean lenientConstructorResolution = true;
 
+	//配置文件中配的构造器参数
 	private ConstructorArgumentValues constructorArgumentValues;
 
 	private MutablePropertyValues propertyValues;

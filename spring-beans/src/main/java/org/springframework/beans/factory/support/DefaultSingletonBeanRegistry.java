@@ -94,6 +94,9 @@ public class DefaultSingletonBeanRegistry extends SimpleAliasRegistry implements
 	 * 与 singletonObjects 不同在于，
 	 * 当一个单例bean被放到这里面以后，那么当bean还在创建过程中，就可以通过getBean 方法获取到了，
 	 * 其目的就是用来检测循环引用
+	 *
+	 * value: 是从ObjectFactory获取到的还在创建中的bean，
+	 * 放到这里以后，就把beanName从{@link DefaultSingletonBeanRegistry#singletonFactories} 中删除(互斥)
 	 */
 	private final Map<String, Object> earlySingletonObjects = new HashMap<String, Object>(16);
 
@@ -121,10 +124,10 @@ public class DefaultSingletonBeanRegistry extends SimpleAliasRegistry implements
 	/** Map between containing bean names: bean name --> Set of bean names that the bean contains */
 	private final Map<String, Set<String>> containedBeanMap = new ConcurrentHashMap<String, Set<String>>(16);
 
-	/** Map between dependent bean names: bean name --> Set of dependent bean names */
+	/** Map between dependent bean names: bean name --> Set of dependent bean names 依赖的bean */
 	private final Map<String, Set<String>> dependentBeanMap = new ConcurrentHashMap<String, Set<String>>(64);
 
-	/** Map between depending bean names: bean name --> Set of bean names for the bean's dependencies */
+	/** Map between depending bean names: bean name --> Set of bean names for the bean's dependencies 被依赖的bean */
 	private final Map<String, Set<String>> dependenciesForBeanMap = new ConcurrentHashMap<String, Set<String>>(64);
 
 
