@@ -408,6 +408,11 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 			throws BeansException {
 
 		Object result = existingBean;
+		/**
+		 * Spring获取Bean的规则有这样一条：
+		 * 尽可能保证所有bean 初始化以后，都会调用注册的BeanPostProcessor 的 postProcessAfterInitialization 方法进行处理，
+		 * 在实际开发中，可以针对此特性涉及自己的业务逻辑
+		 */
 		for (BeanPostProcessor beanProcessor : getBeanPostProcessors()) {
 			result = beanProcessor.postProcessAfterInitialization(result, beanName);
 			if (result == null) {
@@ -447,7 +452,7 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 			//验证及准备覆盖的方法
 			/**
 			 * 2. 对override 属性进行标记及验证
-			 * Spring 配置中存在lookup-method 和 replace-method 的，
+			 * Spring 配置中存在lookup-method 和 replace-method，
 			 * 而这两个配置的加载，其实就是将配置统一存放在 BeanDefinition 的 methodOverrides属性里{@link AbstractBeanDefinition#methodOverrides}。
 			 * 这个函数的操作其实就是针对于这两个配置的
 			 */
@@ -460,14 +465,18 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 
 		try {
 			// Give BeanPostProcessors a chance to return a proxy instead of the target bean instance.
-			// 给 BeanPostProcessors 一个机会，返回的代理来替代真正的实例
+			// 给 BeanPostProcessors 一个机会，用返回的代理来替代真正的实例
 			/**
-			 * 对BeanDefinition 中的属性做一些前置工作
 			 * 3. 应用初始化前的后处理器操作，解析指定bean 是否存在初始化前的短路操作
+			 *
+			 * 可以对BeanDefinition 中的属性做一些前置处理
 			 */
 			Object bean = resolveBeforeInstantiation(beanName, rootBeanDefinition);
+			/**
+			 * 短路判断，如果前置处理返回的结果不为空，直接略过后续的Bean 的创建，直接返回结果
+			 * AOP基于这里的判断
+			 */
 			if (bean != null) {
-				//AOP基于这里的判断
 				return bean;
 			}
 		}
@@ -476,7 +485,7 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 					"BeanPostProcessor before instantiation of bean failed", ex);
 		}
 
-		//4. 创建bean
+		//4. 创建bean（常规bean 的创建）
 		Object beanInstance = doCreateBean(beanName, rootBeanDefinition, args);
 		if (logger.isDebugEnabled()) {
 			logger.debug("Finished creating instance of bean '" + beanName + "'");
@@ -887,8 +896,10 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 		if (!Boolean.FALSE.equals(mbd.beforeInstantiationResolved)) {
 			// Make sure bean class is actually resolved at this point.
 			if (mbd.hasBeanClass() && !mbd.isSynthetic() && hasInstantiationAwareBeanPostProcessors()) {
+				//实例化前的后处理前
 				bean = applyBeanPostProcessorsBeforeInstantiation(mbd.getBeanClass(), beanName);
 				if (bean != null) {
+					//实例化后的后处理前
 					bean = applyBeanPostProcessorsAfterInitialization(bean, beanName);
 				}
 			}
@@ -1653,6 +1664,10 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 	 * @see #applyBeanPostProcessorsAfterInitialization
 	 *
 	 * 从FactoryBean.getObject后的后续处理
+	 *
+	 * Spring获取Bean的规则有这样一条：
+	 * 尽可能保证所有bean 初始化以后，都会调用注册的BeanPostProcessor 的 postProcessAfterInitialization 方法进行处理，
+	 * 在实际开发中，可以针对此特性涉及自己的业务逻辑
 	 */
 	@Override
 	protected Object postProcessObjectFromFactoryBean(Object object, String beanName) {

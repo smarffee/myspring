@@ -112,7 +112,7 @@ public class DefaultSingletonBeanRegistry extends SimpleAliasRegistry implements
 	private Set<Exception> suppressedExceptions;
 
 	/** Flag that indicates whether we're currently within destroySingletons */
-	/** 指示当前是否在DestroySingleton中的标志 **/
+	/** 标记当前是否在DestroySingleton中的标志 **/
 	private boolean singletonsCurrentlyInDestruction = false;
 
 	/** Disposable bean instances: bean name --> disposable instance */
@@ -187,6 +187,11 @@ public class DefaultSingletonBeanRegistry extends SimpleAliasRegistry implements
 	 * @param beanName the name of the bean to look for
 	 * @param allowEarlyReference whether early references should be created or not 是否应创建早期引用
 	 * @return the registered singleton object, or <code>null</code> if none found
+	 *
+	 *
+	 * 首先尝试在缓存中加载，再尝试从singletonFactories 中加载
+	 *
+	 * @param allowEarlyReference true:允许早期依赖
 	 */
 	protected Object getSingleton(String beanName, boolean allowEarlyReference) {
 		//检查缓存中是否存在实例
@@ -201,7 +206,7 @@ public class DefaultSingletonBeanRegistry extends SimpleAliasRegistry implements
 				if (singletonObject == null && allowEarlyReference) {
 					/**
 					 * 当某些方法需要提前初始化的时候则会调用 addSingletonFactory 方法，
-					 * 将对应的ObjectFactory初始化策略储存在singletonFactories
+					 * 将对应的ObjectFactory初始化策略储存在singletonFactories 中
 					 */
 					//3. 如果还获取不到，再尝试从singletonObjects 获取 beanName 对应的ObjectFactory
 					ObjectFactory singletonFactory = this.singletonFactories.get(beanName);

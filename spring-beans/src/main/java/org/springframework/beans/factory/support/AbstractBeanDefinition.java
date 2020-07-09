@@ -195,6 +195,9 @@ public abstract class AbstractBeanDefinition extends BeanMetadataAttributeAccess
 	/**
 	 * Spring 配置中存在lookup-method 和 replace-method 的，
 	 * 而这两个配置的加载，其实就是将配置统一存放在该属性里。
+	 *
+	 * 这两个功能的实现原理其实是在bean 实例化的时候如果检测到存在 methodOverrides 属性，
+	 * 会动态地为当前bean 生成代理并使用对应的拦截器为 bean 做增强处理。
 	 */
 	private MethodOverrides methodOverrides = new MethodOverrides();
 
@@ -980,6 +983,11 @@ public abstract class AbstractBeanDefinition extends BeanMetadataAttributeAccess
 	 * Validate and prepare the method overrides defined for this bean.
 	 * Checks for existence of a method with the specified name.
 	 * @throws BeanDefinitionValidationException in case of validation failure
+	 *
+	 * 对override 属性进行标记及验证
+	 * Spring 配置中存在lookup-method 和 replace-method，
+	 * 而这两个配置的加载，其实就是将配置统一存放在 BeanDefinition 的 methodOverrides属性里{@link AbstractBeanDefinition#methodOverrides}。
+	 * 这个函数的操作其实就是针对于这两个配置的
 	 */
 	public void prepareMethodOverrides() throws BeanDefinitionValidationException {
 		// Check that lookup methods exists.
@@ -1007,6 +1015,13 @@ public abstract class AbstractBeanDefinition extends BeanMetadataAttributeAccess
 					"' on class [" + getBeanClassName() + "]");
 		}
 		else if (count == 1) {
+			/**
+			 * 如果一个类存在若干个重载方法，那么，在函数调用及增强的时候还需要根据参数类型进行匹配，来最终确认当前调用到底是哪个函数。
+			 * 但是，Spring将一部分匹配工作在这里完成了，如果当前类中的方法只有一个，那么就设置重载该方法没有被重载，
+			 * 这样
+			 * 1. 在后续调用的时候便可以直接使用找到方法，而不需要进行方法的参数配置验证了，
+			 * 2. 而且还可以提前对方法存在性进行验证。
+			 */
 			// Mark override as not overloaded, to avoid the overhead of arg type checking.
 			// 标记MethodOverride 暂未被覆盖，避免参数类型检查的开销
 			mo.setOverloaded(false);

@@ -140,6 +140,11 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
 	/** String resolvers to apply e.g. to annotation attribute values */
 	private final List<StringValueResolver> embeddedValueResolvers = new LinkedList<StringValueResolver>();
 
+	/**
+	 * Spring获取Bean的规则有这样一条：
+	 * 进可能保证所有bean 初始化以后，都会调用注册的BeanPostProcessor 的 postProcessAfterInitialization 方法进行处理，
+	 * 在实际开发中，可以针对此特性涉及自己的业务逻辑
+	 */
 	/** BeanPostProcessors to apply in createBean */
 	private final List<BeanPostProcessor> beanPostProcessors = new ArrayList<BeanPostProcessor>();
 
@@ -244,7 +249,7 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
 			final String name, final Class<T> requiredType, final Object[] args, boolean typeCheckOnly)
 			throws BeansException {
 
-		//获取原始名称
+		//(别名)获取原始名称
 		final String beanName = transformedBeanName(name);
 		Object bean;
 
@@ -1491,7 +1496,9 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
 
 		// Don't let calling code try to dereference the factory if the bean isn't a factory.
 		// 如果指定的name 是工厂相关（以&为前缀）且beanInstance 又不是FactoryBean 类型，则验证不通过
-		// 1. 对FactoryBean 正确性进行校验
+		/**
+		 * 1. 对FactoryBean 正确性进行校验
+ 		 */
 		if (BeanFactoryUtils.isFactoryDereference(name) && !(beanInstance instanceof FactoryBean)) {
 			throw new BeanIsNotAFactoryException(transformedBeanName(name), beanInstance.getClass());
 		}
@@ -1502,7 +1509,9 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
 		// 现在我们有了bean 的实例，这个实例可能会是正常的bean 或者是 FactoryBean
 		// 如果是FactoryBean， 我们使用它去创建实例，
 		// 但是用户想要直接获取工厂实例而不是工厂的getObject 方法对应的实例，那么传入的name应该加前缀 &
-		// 2. 对非FactoryBean 不做任何处理
+		/**
+		 * 2. 对非FactoryBean 不做任何处理
+ 		 */
 		if (!(beanInstance instanceof FactoryBean) || BeanFactoryUtils.isFactoryDereference(name)) {
 			return beanInstance;
 		}
@@ -1524,13 +1533,17 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
 			if (mbd == null && containsBeanDefinition(beanName)) {
 				//将存储xml配置文件的GernericBeanDefinition转换为RootBeanDefinition，
 				//如果指定beanName 是子bean 的话，同时会合并父类的相关属性
-				//3. 对bean 进行转换
+				/**
+				 * 3. 对bean 进行转换
+				 */
 				mbd = getMergedLocalBeanDefinition(beanName);
 			}
 			//是否是用户定义，而不是应用程序本身定义的
 			boolean synthetic = (mbd != null && mbd.isSynthetic());
 
-			//4. 将从Factory中解析bean 的工作委托给getObjectFromFactoryBean
+			/**
+			 * 4. 将从Factory中解析bean 的工作委托给getObjectFromFactoryBean
+			 */
 			object = getObjectFromFactoryBean(factory, beanName, !synthetic);
 		}
 		return object;

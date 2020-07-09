@@ -74,6 +74,10 @@ public interface BeanPostProcessor {
 	 * @throws org.springframework.beans.BeansException in case of errors
 	 * @see org.springframework.beans.factory.InitializingBean#afterPropertiesSet
 	 * @see org.springframework.beans.factory.FactoryBean
+	 *
+	 * Spring获取Bean的规则有这样一条：
+	 * 尽可能保证所有bean 初始化以后，都会调用注册的BeanPostProcessor 的 postProcessAfterInitialization 方法进行处理，
+	 * 在实际开发中，可以针对此特性涉及自己的业务逻辑
 	 */
 	Object postProcessAfterInitialization(Object bean, String beanName) throws BeansException;
 
