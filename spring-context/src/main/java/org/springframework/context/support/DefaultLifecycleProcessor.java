@@ -47,6 +47,9 @@ import org.springframework.util.Assert;
  * @author Mark Fisher
  * @author Juergen Hoeller
  * @since 3.0
+ *
+ * 当ApplicationContext 启动或停止时，它会通过 LifecycleProcessor 来与所有声明的 bean 的周期做状态更新，
+ * LifecycleProcessor 的默认实现
  */
 public class DefaultLifecycleProcessor implements LifecycleProcessor, BeanFactoryAware {
 
@@ -104,6 +107,7 @@ public class DefaultLifecycleProcessor implements LifecycleProcessor, BeanFactor
 		this.running = false;
 	}
 
+	//启动所有实现 Lifecycle 接口的 bean
 	public void onRefresh() {
 		startBeans(true);
 		this.running = true;

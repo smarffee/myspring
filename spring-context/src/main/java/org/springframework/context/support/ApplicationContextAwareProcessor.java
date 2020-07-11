@@ -69,7 +69,9 @@ class ApplicationContextAwareProcessor implements BeanPostProcessor {
 		this.applicationContext = applicationContext;
 	}
 
-
+	/*
+	 * bean的属性值填充完以后，init-method调用之前调用本方法
+	 */
 	public Object postProcessBeforeInitialization(final Object bean, String beanName) throws BeansException {
 		AccessControlContext acc = null;
 
@@ -119,6 +121,9 @@ class ApplicationContextAwareProcessor implements BeanPostProcessor {
 		}
 	}
 
+	/*
+	 * bean的属性值填充完以后，init-method调用之后调用本方法
+	 */
 	public Object postProcessAfterInitialization(Object bean, String beanName) {
 		return bean;
 	}

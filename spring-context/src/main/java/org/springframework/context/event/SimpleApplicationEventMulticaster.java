@@ -38,6 +38,9 @@ import org.springframework.context.ApplicationListener;
  * @author Rod Johnson
  * @author Juergen Hoeller
  * @see #setTaskExecutor
+ *
+ * Spring默认实现的消息事件广播器
+ * 消息事件载体{@link ApplicationEvent}
  */
 public class SimpleApplicationEventMulticaster extends AbstractApplicationEventMulticaster {
 
@@ -82,13 +85,19 @@ public class SimpleApplicationEventMulticaster extends AbstractApplicationEventM
 
 
 	@SuppressWarnings("unchecked")
+	/**
+	 * 广播消息
+	 */
 	public void multicastEvent(final ApplicationEvent event) {
+		//遍历所有的监听器
 		for (final ApplicationListener listener : getApplicationListeners(event)) {
 			Executor executor = getTaskExecutor();
 			if (executor != null) {
 				executor.execute(new Runnable() {
 					@SuppressWarnings("unchecked")
 					public void run() {
+						// 使用监听器的 onApplicationEvent 方法来进行监听器的处理
+						// 对于每个监听器来说，都可以获取到消息事件，但是具体要不要处理，由具体的监听器自己决定
 						listener.onApplicationEvent(event);
 					}
 				});

@@ -33,6 +33,20 @@ package org.springframework.beans.factory;
  *
  * @author Chris Beams
  * @since 3.1
+ *
+ * 实现了Aware 接口的bean 在被初始化之后，可以获得一些对应的资源
+ *
+ * 具体实现方式是：
+ * 在bean 属性填充完以后，Spring会调用 {@link org.springframework.beans.factory.config.BeanPostProcessor}
+ * 在ClassPathXmlApplicationContext 实例化的过程中，
+ * {@link org.springframework.context.support.AbstractApplicationContext#prepareBeanFactory(org.springframework.beans.factory.config.ConfigurableListableBeanFactory)}
+ *
+ * 会设置{@link org.springframework.context.support.ApplicationContextAwareProcessor}
+ *
+ * 所以在bean初始化过程中，在init-method 调用前，调用
+ * {@link org.springframework.context.support.ApplicationContextAwareProcessor#invokeAwareInterfaces(java.lang.Object)}
+ *
+ * 最终实现了 Aware 类型的bean，可以获得对应的资源
  */
 public interface Aware {
 

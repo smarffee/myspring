@@ -121,6 +121,10 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
 	private boolean cacheBeanMetadata = true;
 
 	/** Resolution strategy for expressions in bean definition values */
+	/**
+	 * 这个方法会设置值
+	 * {@link org.springframework.context.support.AbstractApplicationContext#prepareBeanFactory(org.springframework.beans.factory.config.ConfigurableListableBeanFactory)}
+	 */
 	private BeanExpressionResolver beanExpressionResolver;
 
 	/** Spring 3.0 ConversionService to use instead of PropertyEditors */
@@ -813,7 +817,9 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
 
 	public void addBeanPostProcessor(BeanPostProcessor beanPostProcessor) {
 		Assert.notNull(beanPostProcessor, "BeanPostProcessor must not be null");
+		// 先移除已经注册过的 BeanPostProcessor
 		this.beanPostProcessors.remove(beanPostProcessor);
+		// 然后注册 BeanPostProcessor
 		this.beanPostProcessors.add(beanPostProcessor);
 		if (beanPostProcessor instanceof InstantiationAwareBeanPostProcessor) {
 			this.hasInstantiationAwareBeanPostProcessors = true;
@@ -1354,6 +1360,8 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
 	 * @param beanDefinition the bean definition that the value comes from
 	 * @return the resolved value
 	 * @see #setBeanExpressionResolver
+	 *
+	 * 对SPEL(Spring Expression Languane)语言的解析
 	 */
 	protected Object evaluateBeanDefinitionString(String value, BeanDefinition beanDefinition) {
 		if (this.beanExpressionResolver == null) {

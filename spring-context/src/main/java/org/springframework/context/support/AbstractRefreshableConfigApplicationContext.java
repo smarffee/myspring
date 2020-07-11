@@ -72,12 +72,15 @@ public abstract class AbstractRefreshableConfigApplicationContext extends Abstra
 	/**
 	 * Set the config locations for this application context.
 	 * <p>If not set, the implementation may use a default as appropriate.
+	 *
+	 * 支持多个配置文件以数组方同时传入
 	 */
 	public void setConfigLocations(String[] locations) {
 		if (locations != null) {
 			Assert.noNullElements(locations, "Config locations must not be null");
 			this.configLocations = new String[locations.length];
 			for (int i = 0; i < locations.length; i++) {
+				//解析给定的路径，如果数组中包含特殊符合，如${var}，那么resolvePath 中会搜寻匹配的系统遍历并替换
 				this.configLocations[i] = resolvePath(locations[i]).trim();
 			}
 		}
@@ -117,6 +120,8 @@ public abstract class AbstractRefreshableConfigApplicationContext extends Abstra
 	 * system property values if necessary. Applied to config locations.
 	 * @param path the original file path
 	 * @return the resolved file path
+	 *
+	 * 解析给定的路径，如果数组中包含特殊符合，如${var}，那么resolvePath 中会搜寻匹配的系统遍历并替换
 	 */
 	protected String resolvePath(String path) {
 		return this.getEnvironment().resolveRequiredPlaceholders(path);

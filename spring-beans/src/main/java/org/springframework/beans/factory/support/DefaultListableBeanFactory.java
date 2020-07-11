@@ -147,6 +147,7 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 	private boolean configurationFrozen = false;
 
 	/** Cached array of bean definition names in case of frozen configuration */
+	// 冻结所有的bean 定义，说明注册的bean 定义，将不被修改或任何进一步的处理
 	private String[] frozenBeanDefinitionNames;
 
 
@@ -574,6 +575,10 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 		return (this.configurationFrozen || super.isBeanEligibleForMetadataCaching(beanName));
 	}
 
+	/**
+	 * ApplicationContext 创建时，初始化剩下的单例
+	 * @throws BeansException
+	 */
 	public void preInstantiateSingletons() throws BeansException {
 		if (this.logger.isInfoEnabled()) {
 			this.logger.info("Pre-instantiating singletons in " + this);
@@ -582,6 +587,7 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 		synchronized (this.beanDefinitionMap) {
 			// Iterate over a copy to allow for init methods which in turn register new bean definitions.
 			// While this may not be part of the regular factory bootstrap, it does otherwise work fine.
+			// 迭代一个副本，允许init方法注册新的bean定义。虽然这可能不是常规工厂引导的一部分，但它在其他方面工作得很好。
 			beanNames = new ArrayList<String>(this.beanDefinitionNames);
 		}
 		for (String beanName : beanNames) {

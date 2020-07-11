@@ -29,6 +29,13 @@ import org.springframework.beans.factory.config.BeanFactoryPostProcessor;
  * @author Juergen Hoeller
  * @since 3.0.1
  * @see org.springframework.context.annotation.ConfigurationClassPostProcessor
+ *
+ *
+ * 只对 BeanDefinitionRegistry 类型的 ConfigurableListableBeanFactory 有效，
+ * 如果判断 beanFactory 不是 BeanDefinitionRegistry 类型，
+ * BeanDefinitionRegistryPostProcessor 可以忽略
+ * {@link org.springframework.context.support.AbstractApplicationContext#invokeBeanFactoryPostProcessors(org.springframework.beans.factory.config.ConfigurableListableBeanFactory)}
+ *
  */
 public interface BeanDefinitionRegistryPostProcessor extends BeanFactoryPostProcessor {
 

@@ -40,7 +40,7 @@ import org.springframework.core.LocalVariableTableParameterNameDiscoverer;
  * typically delegating to one or more specific bean definition readers.
  *
  * <p><b>Note that there is a similar base class for WebApplicationContexts.</b>
- * {@link org.springframework.web.context.support.AbstractRefreshableWebApplicationContext}
+ * {@link //org.springframework.web.context.support.AbstractRefreshableWebApplicationContext}
  * provides the same subclassing strategy, but additionally pre-implements
  * all context functionality for web environments. There is also a
  * pre-defined way to receive config locations for a web context.
@@ -57,7 +57,7 @@ import org.springframework.core.LocalVariableTableParameterNameDiscoverer;
  * @since 1.1.3
  * @see #loadBeanDefinitions
  * @see org.springframework.beans.factory.support.DefaultListableBeanFactory
- * @see org.springframework.web.context.support.AbstractRefreshableWebApplicationContext
+ * @see //org.springframework.web.context.support.AbstractRefreshableWebApplicationContext
  * @see AbstractXmlApplicationContext
  * @see ClassPathXmlApplicationContext
  * @see FileSystemXmlApplicationContext
@@ -117,6 +117,8 @@ public abstract class AbstractRefreshableApplicationContext extends AbstractAppl
 	 * This implementation performs an actual refresh of this context's underlying
 	 * bean factory, shutting down the previous bean factory (if any) and
 	 * initializing a fresh bean factory for the next phase of the context's lifecycle.
+	 *
+	 * 初始化BeanFactory，并进行XML 文件读取，并将得到 BeanFactory 记录在当前实体的属性
 	 */
 	@Override
 	protected final void refreshBeanFactory() throws BeansException {
@@ -125,11 +127,26 @@ public abstract class AbstractRefreshableApplicationContext extends AbstractAppl
 			closeBeanFactory();
 		}
 		try {
+			/**
+			 * 1. 创建 DefaultListableBeanFactory
+			 * XmlBeanFactory 继承了 DefaultListableBeanFactory，
+			 * 说明 DefaultListableBeanFactory 是容器的基础，必须首先要实例化
+ 			 */
 			DefaultListableBeanFactory beanFactory = createBeanFactory();
+
+			// 2.为了序列化指定id，如果需要的话，让这个 beanFactory 从id 反序列化到 beanFactory 对象
 			beanFactory.setSerializationId(getId());
+
+			// 3. 定制 beanFactory， 设置相关属性，包括是否允许覆盖同名称的不同定义的对象，以及循环依赖，
+			// 以及设置@Autowired 和 @Qualifier 注解解析器 QualifierAnnotationAutowiredCandidateResolver
+			// 这里已经开始了对 BeanFactory 的拓展
 			customizeBeanFactory(beanFactory);
+
+			// 4. 加载BeanDefinition。 初始化DocumentReader，并进行xml 文件读取及解析
 			loadBeanDefinitions(beanFactory);
+
 			synchronized (this.beanFactoryMonitor) {
+				// 5. 使用全局变量记录 beanFactory
 				this.beanFactory = beanFactory;
 			}
 		}
@@ -208,14 +225,31 @@ public abstract class AbstractRefreshableApplicationContext extends AbstractAppl
 	 * @see DefaultListableBeanFactory#setAllowCircularReferences
 	 * @see DefaultListableBeanFactory#setAllowRawInjectionDespiteWrapping
 	 * @see DefaultListableBeanFactory#setAllowEagerClassLoading
+	 *
+	 * 定制 beanFactory， 设置相关属性，包括是否允许覆盖同名称的不同定义的对象，以及循环依赖，
+	 * 以及设置@Autowired 和 @Qualifier 注解解析器 QualifierAnnotationAutowiredCandidateResolver
+	 * 这里已经开始了对 BeanFactory 的拓展
 	 */
 	protected void customizeBeanFactory(DefaultListableBeanFactory beanFactory) {
+		/*
+		 * 如果属性allowBeanDefinitionOverriding 不为空，设置给beanFactory 对象相应属性，
+		 * 此属性的含义：是否允许覆盖同名称的不同定义的对象
+		 */
 		if (this.allowBeanDefinitionOverriding != null) {
 			beanFactory.setAllowBeanDefinitionOverriding(this.allowBeanDefinitionOverriding);
 		}
+
+		/*
+		 * 如果属性 allowCircularReferences 不为空，设置给 beanFactory 对象相应的属性
+		 * 此属性含义：是否允许bean 之间存在循环依赖
+		 */
 		if (this.allowCircularReferences != null) {
 			beanFactory.setAllowCircularReferences(this.allowCircularReferences);
 		}
+
+		/*
+		 * 用于@Autowired 和 @Qualifier
+		 */
 		beanFactory.setAutowireCandidateResolver(new QualifierAnnotationAutowireCandidateResolver());
 	}
 

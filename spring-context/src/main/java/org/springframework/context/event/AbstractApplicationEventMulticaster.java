@@ -125,6 +125,8 @@ public abstract class AbstractApplicationEventMulticaster implements Application
 	 * non-matching listeners early, based on cached matching information.
 	 * @return a Collection of ApplicationListeners
 	 * @see org.springframework.context.ApplicationListener
+	 *
+	 * 根据消息事件，找到对应的监听器
 	 */
 	protected Collection<ApplicationListener> getApplicationListeners(ApplicationEvent event) {
 		Class<? extends ApplicationEvent> eventType = event.getClass();

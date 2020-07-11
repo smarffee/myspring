@@ -180,6 +180,7 @@ class BeanDefinitionValueResolver {
 		else if (value instanceof TypedStringValue) {
 			// Convert value to target type here.
 			TypedStringValue typedStringValue = (TypedStringValue) value;
+			// 对SPEL(Spring Expression Languane)语言的解析
 			Object valueObject = evaluate(typedStringValue);
 			try {
 				Class<?> resolvedTargetType = resolveTargetType(typedStringValue);
@@ -206,6 +207,8 @@ class BeanDefinitionValueResolver {
 	 * Evaluate the given value as an expression, if necessary.
 	 * @param value the candidate value (may be an expression)
 	 * @return the resolved value
+	 *
+	 * 对SPEL(Spring Expression Languane)语言的解析
 	 */
 	protected Object evaluate(TypedStringValue value) {
 		Object result = this.beanFactory.evaluateBeanDefinitionString(value.getValue(), this.beanDefinition);

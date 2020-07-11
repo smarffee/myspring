@@ -16,6 +16,8 @@
 
 package org.springframework.context;
 
+import org.springframework.context.support.AbstractApplicationContext;
+
 /**
  * Interface defining methods for start/stop lifecycle control.
  * The typical use case for this is to control asynchronous processing.
@@ -43,6 +45,14 @@ package org.springframework.context;
  * @see ConfigurableApplicationContext
  * @see org.springframework.jms.listener.AbstractMessageListenerContainer
  * @see org.springframework.scheduling.quartz.SchedulerFactoryBean
+ *
+ * 实现此接口后Spring 会保证
+ * 在启动的时候，调用其start 方法来开始声明周期
+ * 在关闭的时候，调用其stop 方法来结束声明周期
+ * 通常用来配置后台程序，在启动后一直运行（如：对MQ的进行轮询等）
+ *
+ * ApplicationContext 的初始最后正是保证了这一功能的实现。
+ * {@link AbstractApplicationContext#finishRefresh()}
  */
 public interface Lifecycle {
 

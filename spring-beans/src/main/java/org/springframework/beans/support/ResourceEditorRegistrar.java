@@ -22,6 +22,7 @@ import java.io.InputStream;
 import java.net.URI;
 import java.net.URL;
 
+import org.springframework.beans.factory.support.AbstractBeanFactory;
 import org.xml.sax.InputSource;
 
 import org.springframework.beans.PropertyEditorRegistrar;
@@ -105,6 +106,20 @@ public class ResourceEditorRegistrar implements PropertyEditorRegistrar {
 	 * @see org.springframework.beans.propertyeditors.ClassEditor
 	 * @see org.springframework.beans.propertyeditors.ClassArrayEditor
 	 * @see org.springframework.core.io.support.ResourceArrayPropertyEditor
+	 *
+	 * 注册属性值编辑器
+	 *
+	 * 调用地方
+	 * 间接：
+	 * {@link ConstructorResolver#autowireConstructor(java.lang.String, org.springframework.beans.factory.support.RootBeanDefinition, java.lang.reflect.Constructor[], java.lang.Object[])}
+	 * 直接：
+	 * {@link AbstractBeanFactory#initBeanWrapper(org.springframework.beans.BeanWrapper)}
+	 *
+	 * 在bean 的初始化后，会调用此方法，进行批量的通用属性编辑器注册。
+	 * 注册后，在属性值填充的环节，便可以直接让spring 使用这些编辑器进行属性值的解析了
+	 *
+	 * 其他注册的属性值编辑器的地方
+	 * {@link PropertyEditorRegistrySupport#createDefaultEditors()}
 	 */
 	public void registerCustomEditors(PropertyEditorRegistry registry) {
 		ResourceEditor baseEditor = new ResourceEditor(this.resourceLoader, this.propertyResolver);
