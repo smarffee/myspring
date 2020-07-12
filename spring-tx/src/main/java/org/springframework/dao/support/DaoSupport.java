@@ -32,19 +32,26 @@ import org.springframework.beans.factory.InitializingBean;
  * @since 1.2.2
  * @see org.springframework.jdbc.core.support.JdbcDaoSupport
  * @see org.springframework.orm.jdo.support.JdoDaoSupport
+ *
+ * mybatis-spring
+ * 为接口mapper 创建实例的 MapperFactoryBean 间接实现了本类
  */
 public abstract class DaoSupport implements InitializingBean {
 
 	/** Logger available to subclasses */
 	protected final Log logger = LogFactory.getLog(getClass());
 
-
+	//bean 初始化的时候会调用
 	public final void afterPropertiesSet() throws IllegalArgumentException, BeanInitializationException {
 		// Let abstract subclasses check their configuration.
+		// 抽象方法，留给子类实现
+		// 对DAO配置的验证
 		checkDaoConfig();
 
 		// Let concrete implementations initialize themselves.
 		try {
+			// 空实现，留给子类做进一步实现
+			// 对DAO的初始化
 			initDao();
 		}
 		catch (Exception ex) {

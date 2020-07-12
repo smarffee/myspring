@@ -239,24 +239,32 @@ public class ClassPathScanningCandidateComponentProvider implements EnvironmentC
 	 * Scan the class path for candidate components.
 	 * @param basePackage the package to check for annotated classes
 	 * @return a corresponding Set of autodetected bean definitions
+	 *
+	 * 扫描 basePackage 文件下的Java文件
 	 */
 	public Set<BeanDefinition> findCandidateComponents(String basePackage) {
 		Set<BeanDefinition> candidates = new LinkedHashSet<BeanDefinition>();
 		try {
+			// 1.根据传进来的basePackage 生成绝对路径
 			String packageSearchPath = ResourcePatternResolver.CLASSPATH_ALL_URL_PREFIX +
 					resolveBasePackage(basePackage) + "/" + this.resourcePattern;
+			// 2.完成了扫描
 			Resource[] resources = this.resourcePatternResolver.getResources(packageSearchPath);
 			boolean traceEnabled = logger.isTraceEnabled();
 			boolean debugEnabled = logger.isDebugEnabled();
+
 			for (Resource resource : resources) {
 				if (traceEnabled) {
 					logger.trace("Scanning " + resource);
 				}
 				if (resource.isReadable()) {
 					try {
+						// 3.根据对应的文件生成了对应的bean，使用ScannedGenericBeanDefinition 类型承载bean 的信息
 						MetadataReader metadataReader = this.metadataReaderFactory.getMetadataReader(resource);
+						// 判断当前扫描的文件是否符合要求，之前注册的一些过滤器信息，在此派上了用场
 						if (isCandidateComponent(metadataReader)) {
 							ScannedGenericBeanDefinition sbd = new ScannedGenericBeanDefinition(metadataReader);
+							//只记录的了resource 和 source 信息
 							sbd.setResource(resource);
 							sbd.setSource(resource);
 							if (isCandidateComponent(sbd)) {
@@ -313,6 +321,8 @@ public class ClassPathScanningCandidateComponentProvider implements EnvironmentC
 	 * and does match at least one include filter.
 	 * @param metadataReader the ASM ClassReader for the class
 	 * @return whether the class qualifies as a candidate component
+	 *
+	 * 判断当前扫描的文件是否符合要求，之前注册的一些过滤器信息，在此派上了用场
 	 */
 	protected boolean isCandidateComponent(MetadataReader metadataReader) throws IOException {
 		for (TypeFilter tf : this.excludeFilters) {
