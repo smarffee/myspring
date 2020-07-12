@@ -43,6 +43,7 @@ public interface AdvisorAdapterRegistry {
 	 * @throws UnknownAdviceTypeException if no registered advisor adapter
 	 * can wrap the supposed advice
 	 */
+	//adviceObject转换为增强器Advisor，只针对 Advisor 和 Advice 两种类型有效
 	Advisor wrap(Object advice) throws UnknownAdviceTypeException;
 
 	/**

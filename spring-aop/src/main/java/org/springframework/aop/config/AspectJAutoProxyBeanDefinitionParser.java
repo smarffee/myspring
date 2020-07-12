@@ -16,6 +16,7 @@
 
 package org.springframework.aop.config;
 
+import org.springframework.aop.aspectj.annotation.AnnotationAwareAspectJAutoProxyCreator;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
@@ -34,12 +35,29 @@ import org.springframework.beans.factory.xml.ParserContext;
  * @author Rob Harrop
  * @author Juergen Hoeller
  * @since 2.0
+ *
+ * xml配置文件中，AOP配置 aspectj-autoproxy 解析器
  */
 class AspectJAutoProxyBeanDefinitionParser implements BeanDefinitionParser {
 
+	/**
+	 * 解析<aop:aspectj-autoproxy> 标签
+	 *
+	 * @param element the element that is to be parsed into one or more {@link BeanDefinition BeanDefinitions}
+	 * @param parserContext the object encapsulating the current state of the parsing process;
+	 * provides access to a {@link org.springframework.beans.factory.support.BeanDefinitionRegistry}
+	 * @return
+	 */
 	public BeanDefinition parse(Element element, ParserContext parserContext) {
+		/**
+		 * 1.注册{@link AnnotationAwareAspectJAutoProxyCreator}
+		 * 关键逻辑的实现
+ 		 */
 		AopNamespaceUtils.registerAspectJAnnotationAutoProxyCreatorIfNecessary(parserContext, element);
+
+		//对于注解中子类的处理
 		extendBeanDefinition(element, parserContext);
+
 		return null;
 	}
 

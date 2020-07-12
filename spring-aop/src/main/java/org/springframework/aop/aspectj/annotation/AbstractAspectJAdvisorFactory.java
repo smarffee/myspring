@@ -71,17 +71,24 @@ public abstract class AbstractAspectJAdvisorFactory implements AspectJAdvisorFac
 	 */
 	@SuppressWarnings("unchecked")
 	protected static AspectJAnnotation findAspectJAnnotationOnMethod(Method method) {
+		//设置敏感的注解类
 		Class<? extends Annotation>[] classesToLookFor = new Class[] {
 				Before.class, Around.class, After.class, AfterReturning.class, AfterThrowing.class, Pointcut.class};
+
+		//循环查找方法上的注解
 		for (Class<? extends Annotation> c : classesToLookFor) {
+			//获取指定方法上的注解，并使用AspectJAnnotation 封装
 			AspectJAnnotation foundAnnotation = findAnnotation(method, c);
+			//找到一个即刻返回
 			if (foundAnnotation != null) {
 				return foundAnnotation;
 			}
 		}
+
 		return null;
 	}
 
+	//获取指定方法上的注解，并使用AspectJAnnotation 封装
 	private static <A extends Annotation> AspectJAnnotation<A> findAnnotation(Method method, Class<A> toLookFor) {
 		A result = AnnotationUtils.findAnnotation(method, toLookFor);
 		if (result != null) {

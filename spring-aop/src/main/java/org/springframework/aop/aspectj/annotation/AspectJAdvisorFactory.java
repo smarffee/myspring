@@ -98,6 +98,7 @@ public interface AspectJAdvisorFactory {
 	 * @see org.springframework.aop.aspectj.AspectJAfterReturningAdvice
 	 * @see org.springframework.aop.aspectj.AspectJAfterThrowingAdvice
 	 */
+	// 根据不同通知注解中的信息初始化对应的增强器
 	Advice getAdvice(Method candidateAdviceMethod, AspectJExpressionPointcut pointcut,
 			MetadataAwareAspectInstanceFactory aif, int declarationOrderInAspect, String aspectName);
 

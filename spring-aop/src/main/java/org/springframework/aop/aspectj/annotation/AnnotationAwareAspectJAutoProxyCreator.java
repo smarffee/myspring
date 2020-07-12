@@ -22,7 +22,11 @@ import java.util.regex.Pattern;
 
 import org.springframework.aop.Advisor;
 import org.springframework.aop.aspectj.autoproxy.AspectJAwareAdvisorAutoProxyCreator;
+import org.springframework.aop.config.AopConfigUtils;
+import org.springframework.aop.config.AopNamespaceUtils;
+import org.springframework.aop.framework.autoproxy.AbstractAutoProxyCreator;
 import org.springframework.beans.factory.ListableBeanFactory;
+import org.springframework.beans.factory.config.BeanPostProcessor;
 import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
 import org.springframework.util.Assert;
 
@@ -44,6 +48,19 @@ import org.springframework.util.Assert;
  * @author Juergen Hoeller
  * @since 2.0
  * @see org.springframework.aop.aspectj.annotation.AspectJAdvisorFactory
+ *
+ * 本类作用：
+ * 为生成的bean，创建代理对象，AOP
+ *
+ * 本类直接注册到Ioc容器地方：
+ * {@link AopConfigUtils#registerAspectJAnnotationAutoProxyCreatorIfNecessary(org.springframework.beans.factory.support.BeanDefinitionRegistry, java.lang.Object)}
+ * 本类间接注册到Ioc容器地方：
+ * {@link AopNamespaceUtils#registerAspectJAnnotationAutoProxyCreatorIfNecessary(org.springframework.beans.factory.xml.ParserContext, org.w3c.dom.Element)}
+ *
+ * 使用本类的地方：
+ * 因为本类实现了间接继承了{@link BeanPostProcessor}，所以当bean 被初始化的时候会调用下面这个方法
+ * {@link AbstractAutoProxyCreator#postProcessAfterInitialization(java.lang.Object, java.lang.String)}
+ *
  */
 public class AnnotationAwareAspectJAutoProxyCreator extends AspectJAwareAdvisorAutoProxyCreator {
 
@@ -77,13 +94,19 @@ public class AnnotationAwareAspectJAutoProxyCreator extends AspectJAwareAdvisorA
 				new BeanFactoryAspectJAdvisorsBuilderAdapter(beanFactory, this.aspectJAdvisorFactory);
 	}
 
-
+	//寻找所有的增强器
 	@Override
 	protected List<Advisor> findCandidateAdvisors() {
 		// Add all the Spring advisors found according to superclass rules.
+		//当使用注解方式配置AOP 的时候，并不是丢弃了对XML 配置的支持
+		//在这里调用父类方法加载配置文件中的AOP声明
+		//父类是从配置文件中获取定义的增强
 		List<Advisor> advisors = super.findCandidateAdvisors();
+
 		// Build Advisors for all AspectJ aspects in the bean factory.
+		// 从注解中获取定义的增强
 		advisors.addAll(this.aspectJAdvisorsBuilder.buildAspectJAdvisors());
+
 		return advisors;
 	}
 

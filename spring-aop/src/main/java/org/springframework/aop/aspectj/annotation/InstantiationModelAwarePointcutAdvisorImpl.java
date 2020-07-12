@@ -62,15 +62,23 @@ class InstantiationModelAwarePointcutAdvisorImpl
 
 	private Boolean isAfterAdvice;
 
-
+	//根据切点生成增强器。所有的增强都是由 Advisor 的实现类 InstantiationModelAwarePointcutAdvisorImpl 统一封装
 	public InstantiationModelAwarePointcutAdvisorImpl(AspectJAdvisorFactory af,  AspectJExpressionPointcut ajexp,
 			MetadataAwareAspectInstanceFactory aif,  Method method, int declarationOrderInAspect, String aspectName) {
 
+		//test()
 		this.declaredPointcut = ajexp;
+
+		//public void test.AspectJTest.beforeTest()
 		this.method = method;
+
 		this.atAspectJAdvisorFactory = af;
 		this.aspectInstanceFactory = aif;
+
+		//0
 		this.declarationOrder = declarationOrderInAspect;
+
+		//test.AspectJTest
 		this.aspectName = aspectName;
 		
 		if (aif.getAspectMetadata().isLazilyInstantiated()) {
@@ -86,6 +94,7 @@ class InstantiationModelAwarePointcutAdvisorImpl
 		}
 		else {
 			// A singleton aspect.
+			// 根据不同通知注解中的信息初始化对应的增强器
 			this.instantiatedAdvice = instantiateAdvice(this.declaredPointcut);
 			this.pointcut = declaredPointcut;
 			this.lazy = false;
@@ -135,7 +144,7 @@ class InstantiationModelAwarePointcutAdvisorImpl
 		return (this.instantiatedAdvice != null);
 	}
 
-
+	// 根据不同通知注解中的信息初始化对应的增强器
 	private Advice instantiateAdvice(AspectJExpressionPointcut pcut) {
 		return this.atAspectJAdvisorFactory.getAdvice(
 				this.method, pcut, this.aspectInstanceFactory, this.declarationOrder, this.aspectName);

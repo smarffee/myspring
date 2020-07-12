@@ -47,6 +47,8 @@ public interface AopProxy {
 	 * @param classLoader the class loader to create the proxy with
 	 * (or <code>null</code> for the low-level proxy facility's default)
 	 * @return the new proxy object (never <code>null</code>)
+	 *
+	 * aop创建代理对象
 	 */
 	Object getProxy(ClassLoader classLoader);
 

@@ -143,16 +143,27 @@ public class ReflectiveMethodInvocation implements ProxyMethodInvocation, Clonea
 		this.arguments = arguments;
 	}
 
-
+	/**
+	 * proceed() 方法，实现了拦截器的逐一调用。
+	 * 实现了 前置增强在目标方法前调用，后置增强在目标方法后调用
+	 *
+	 * 主要职责是维护了链接调用的计数器，记录着当前调用链表的位置，以便链表可以有序的进行下去，
+	 * 这个方法并没有我们设想的维护各种增强顺序，而是将此工作委托给各个增强器，
+	 * 使各个增强器在内部进行逻辑实现
+	 */
 	public Object proceed() throws Throwable {
 		//	We start with an index of -1 and increment early.
+		// 如果没有拦截器或者已经执行了最后一个拦截器，执行切点方法
 		if (this.currentInterceptorIndex == this.interceptorsAndDynamicMethodMatchers.size() - 1) {
 			return invokeJoinpoint();
 		}
 
+		//获取下一个要执行的拦截器
 		Object interceptorOrInterceptionAdvice =
 		    this.interceptorsAndDynamicMethodMatchers.get(++this.currentInterceptorIndex);
+
 		if (interceptorOrInterceptionAdvice instanceof InterceptorAndDynamicMethodMatcher) {
+			//动态匹配
 			// Evaluate dynamic method matcher here: static part will already have
 			// been evaluated and found to match.
 			InterceptorAndDynamicMethodMatcher dm =
@@ -163,12 +174,21 @@ public class ReflectiveMethodInvocation implements ProxyMethodInvocation, Clonea
 			else {
 				// Dynamic matching failed.
 				// Skip this interceptor and invoke the next in the chain.
+				// 不匹配则不执行拦截器
 				return proceed();
 			}
 		}
 		else {
 			// It's an interceptor, so we just invoke it: The pointcut will have
 			// been evaluated statically before this object was constructed.
+			/**
+			 * 普通拦截器，直接调用拦截器，比如：
+			 * ExposeInvocationInterceptor
+			 * DelegatePerTargetObjectIntroductionInterceptor
+			 * MethodBeforeAdviceInterceptor
+			 * AspectJAroundAdvice
+			 * AspectJAfterAdvice
+			 */
 			return ((MethodInterceptor) interceptorOrInterceptionAdvice).invoke(this);
 		}
 	}
