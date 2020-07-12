@@ -74,6 +74,9 @@ public interface PreparedStatementCallback<T> {
 	 * @throws DataAccessException in case of custom exceptions
 	 * @see JdbcTemplate#queryForObject(String, Object[], Class)
 	 * @see JdbcTemplate#queryForList(String, Object[])
+	 *
+	 *
+	 * 用于调用通用方法 execute 的时候，无法处理一些个性化处理方法
 	 */
 	T doInPreparedStatement(PreparedStatement ps) throws SQLException, DataAccessException;
 

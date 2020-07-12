@@ -47,6 +47,8 @@ public interface PreparedStatementSetter {
 	 * @param ps the PreparedStatement to invoke setter methods on
 	 * @throws SQLException if a SQLException is encountered
 	 * (i.e. there is no need to catch SQLException)
+	 *
+	 * 设置PreparedStatement 所需的全部参数
 	 */
 	void setValues(PreparedStatement ps) throws SQLException;
 

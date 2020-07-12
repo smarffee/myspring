@@ -84,7 +84,11 @@ public class RowMapperResultSetExtractor<T> implements ResultSetExtractor<List<T
 		this.rowsExpected = rowsExpected;
 	}
 
-
+	/**
+	 * 负责将结果进行封装并转换成POJO
+	 * rse 代表当前的类为 RowMapperResultSetExtractor
+	 * 在构造 RowMapperResultSetExtractor 时，已经将自动以的 RowMapper 设置了进去
+	 */
 	public List<T> extractData(ResultSet rs) throws SQLException {
 		List<T> results = (this.rowsExpected > 0 ? new ArrayList<T>(this.rowsExpected) : new ArrayList<T>());
 		int rowNum = 0;

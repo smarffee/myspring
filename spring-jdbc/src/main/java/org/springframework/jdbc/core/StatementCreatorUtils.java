@@ -136,6 +136,8 @@ public abstract class StatementCreatorUtils {
 	 * @param inValue the value to set (plain value or a SqlTypeValue)
 	 * @throws SQLException if thrown by PreparedStatement methods
 	 * @see SqlTypeValue
+	 *
+	 * 解析当前属性，对单个参数及类型的匹配处理
 	 */
 	public static void setParameterValue(
 			PreparedStatement ps, int paramIndex, int sqlType, Object inValue)
@@ -176,6 +178,8 @@ public abstract class StatementCreatorUtils {
 	 * @param inValue the value to set (plain value or a SqlTypeValue)
 	 * @throws SQLException if thrown by PreparedStatement methods
 	 * @see SqlTypeValue
+	 *
+	 * 解析当前属性，对单个参数及类型的匹配处理
 	 */
 	private static void setParameterValueInternal(
 			PreparedStatement ps, int paramIndex, int sqlType, String typeName, Integer scale, Object inValue)

@@ -57,6 +57,11 @@ public interface ResultSetExtractor<T> {
 	 * @throws SQLException if a SQLException is encountered getting column
 	 * values or navigating (that is, there's no need to catch SQLException)
 	 * @throws DataAccessException in case of custom exceptions
+	 *
+	 *
+	 * 负责将结果进行封装并转换成POJO
+	 * rse 代表当前的类为 RowMapperResultSetExtractor
+	 * 在构造 RowMapperResultSetExtractor 时，已经将自动以的 RowMapper 设置了进去
 	 */
 	T extractData(ResultSet rs) throws SQLException, DataAccessException;
 
