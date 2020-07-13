@@ -41,12 +41,17 @@ public class BeanFactoryAspectJAdvisorsBuilder {
 
 	private final ListableBeanFactory beanFactory;
 
+	// AspectJ 增强器工厂, 可以创建Advisor
 	private final AspectJAdvisorFactory advisorFactory;
 
+	// 被标记@AspectJ 的类的beanName
 	private List<String> aspectBeanNames;
 
+	// 增强器缓存。 key: 被标记@AspectJ 的类的beanName, value: 被@Before, @After 等注解标注的增强器通知, 被封装在Advisor
+	// 如果被标记 @AspectJ 的类的beanName 是原型模式，将在这里缓存增强器工厂
 	private final Map<String, List<Advisor>> advisorsCache = new HashMap<String, List<Advisor>>();
 
+	// 增强器工厂缓存。key: 被标记@AspectJ 的类的beanName, value: 创建增强器通知的工厂
 	private final Map<String, MetadataAwareAspectInstanceFactory> aspectFactoryCache =
 			new HashMap<String, MetadataAwareAspectInstanceFactory>();
 

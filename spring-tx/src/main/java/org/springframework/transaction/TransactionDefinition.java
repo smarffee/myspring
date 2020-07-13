@@ -48,6 +48,10 @@ public interface TransactionDefinition {
 	 * Analogous to the EJB transaction attribute of the same name.
 	 * <p>This is typically the default setting of a transaction definition,
 	 * and typically defines a transaction synchronization scope.
+	 *
+	 * 表示当前方法必须运行在事务中。
+	 * 如果当前事务存在，方法将会该事务中运行。否则，会启动一个新的事务。
+	 * 如果有，一起用。没有就新建。
 	 */
 	int PROPAGATION_REQUIRED = 0;
 
@@ -69,6 +73,10 @@ public interface TransactionDefinition {
 	 * "synchronization on actual transaction").
 	 * @see org.springframework.transaction.support.AbstractPlatformTransactionManager#setTransactionSynchronization
 	 * @see org.springframework.transaction.support.AbstractPlatformTransactionManager#SYNCHRONIZATION_ON_ACTUAL_TRANSACTION
+	 *
+	 * 表示当前方法不需要事务上下文。
+	 * 如果存在当前事务的话，那么该方法会在这个事务中运行。
+	 * 如果有，一起用。没有就不用。
 	 */
 	int PROPAGATION_SUPPORTS = 1;
 
@@ -77,6 +85,10 @@ public interface TransactionDefinition {
 	 * exists. Analogous to the EJB transaction attribute of the same name.
 	 * <p>Note that transaction synchronization within a <code>PROPAGATION_MANDATORY</code>
 	 * scope will always be driven by the surrounding transaction.
+	 *
+	 * 	表示该方法必须在事务中运行。
+	 * 	如果当前事务不存在，会抛出一个异常。
+	 * 	如果有，一起用。没有，不新建，抛异常。
 	 */
 	int PROPAGATION_MANDATORY = 2;
 
@@ -92,6 +104,15 @@ public interface TransactionDefinition {
 	 * transaction synchronizations. Existing synchronizations will be suspended
 	 * and resumed appropriately.
 	 * @see org.springframework.transaction.jta.JtaTransactionManager#setTransactionManager
+	 *
+	 * PROPAGATION_REQUIRES_NEW
+	 * 标识当前方法必须在它自己的事务里运行，一个新的事务将被启动，而如果有一个事务正在运行的话，则在这个方法运行期间被挂起。
+	 * 而spring 中对于此种传播方式的处理，与新事物建立最大的不同点在于，使用 suspend 方法将原事务挂起。
+	 * 将信息挂起的目当然是为了在当前事务执行完毕后，在将原来的事务还原。
+	 *
+	 * 如果有，挂起，自己新建。没有，自己新建，完事以后恢复原有的事务。
+	 * 必须运行在自己的事务里。新老事务，互不相干，互不依赖。
+	 * 需要使用 JtaTransactionManager作为事务管理器
 	 */
 	int PROPAGATION_REQUIRES_NEW = 3;
 
@@ -107,6 +128,13 @@ public interface TransactionDefinition {
 	 * <code>PROPAGATION_NOT_SUPPORTED</code> scope. Existing synchronizations
 	 * will be suspended and resumed appropriately.
 	 * @see org.springframework.transaction.jta.JtaTransactionManager#setTransactionManager
+	 *
+	 * 表示该方法不应该在事务中运行。
+	 * 如果存在当前事务，在该方法运行期间，当前事务会被挂起。
+	 * 如果使用 JtaTransactionManager，则需要访问 TransactionManager
+	 *
+	 * 不用事务，如果有事务，挂起。
+	 * 需要使用JtaTransactionManager作为事务管理器。
 	 */
 	int PROPAGATION_NOT_SUPPORTED = 4;
 
@@ -115,6 +143,11 @@ public interface TransactionDefinition {
 	 * exists. Analogous to the EJB transaction attribute of the same name.
 	 * <p>Note that transaction synchronization is <i>not</i> available within a
 	 * <code>PROPAGATION_NEVER</code> scope.
+	 *
+	 * 表示当前方法不应该运行在事务上下文中。
+	 * 如果当前正有一个事务在运行，则会抛异常。
+	 *
+	 * 不用事务，如果有事务，抛异常。
 	 */
 	int PROPAGATION_NEVER = 5;
 
@@ -128,6 +161,22 @@ public interface TransactionDefinition {
 	 * when working on a JDBC 3.0 driver. Some JTA providers might support
 	 * nested transactions as well.
 	 * @see org.springframework.jdbc.datasource.DataSourceTransactionManager
+	 *
+	 * PROPAGATION_NESTED：嵌入式事务处理
+	 * 表示如果当前有一个事务在运行中，则该方法应该运行在一个嵌套事务中，
+	 * 被嵌套的事务可以独立于封装的事务进行提交或者回滚，
+	 * 如果封装事务不存在，行为就像 PROPAGATION_REQUIRES_NEW。
+	 * 对于嵌入式事务的处理，spring中主要考虑了两种方式的处理：
+	 * 1. Spring中允许嵌入式事务的时候，则首选设置保存点的方式作为异常处理的回滚。
+	 * 2. 对于其他方式，比如JTA，无法使用保存点的方式，那么处理方式与 PROPAGATION_REQUIRES_NEW 相同，
+	 * 而一旦出现异常，则由Spring的事务异常处理机制去完成后续的操作。
+	 * 对于挂起的目的，主要是记录原有事务的状态，以便后续操作对事务的恢复。
+	 *
+	 * 外层事务失败，会回滚内层事务。
+	 * 内层事务失败，不会回滚外层事务。
+	 *
+	 * 这是一个嵌套事务，使用JDBC 3.0驱动时，仅仅支持DataSourceTransactionManager作为事务管理器。
+	 * 还需要把PlatformTransactionManager的nestedTransactionAllowed属性设为true(属性值默认为false)。
 	 */
 	int PROPAGATION_NESTED = 6;
 

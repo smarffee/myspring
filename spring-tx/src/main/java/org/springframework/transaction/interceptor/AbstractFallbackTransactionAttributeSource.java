@@ -68,6 +68,10 @@ public abstract class AbstractFallbackTransactionAttributeSource implements Tran
 	 * Cache of TransactionAttributes, keyed by DefaultCacheKey (Method + target Class).
 	 * <p>As this base class is not marked Serializable, the cache will be recreated
 	 * after serialization - provided that the concrete subclass is Serializable.
+	 *
+	 * 缓存事务属性标签
+	 * key：{@link AbstractFallbackTransactionAttributeSource#getCacheKey(java.lang.reflect.Method, java.lang.Class)}
+	 * value: 方法上或者类上的事务属性标签 @Transactional 解析后的封装类 {@link TransactionAttribute}
 	 */
 	final Map<Object, TransactionAttribute> attributeCache = new ConcurrentHashMap<Object, TransactionAttribute>(1024);
 
@@ -79,11 +83,14 @@ public abstract class AbstractFallbackTransactionAttributeSource implements Tran
 	 * @param targetClass the target class for this invocation (may be <code>null</code>)
 	 * @return TransactionAttribute for this method, or <code>null</code> if the method
 	 * is not transactional
+	 *
+	 * 提取事务标签
 	 */
 	public TransactionAttribute getTransactionAttribute(Method method, Class<?> targetClass) {
 		// First, see if we have a cached value.
 		Object cacheKey = getCacheKey(method, targetClass);
 		Object cached = this.attributeCache.get(cacheKey);
+		// 先从缓存中加载事务标签
 		if (cached != null) {
 			// Value will either be canonical value indicating there is no transaction attribute,
 			// or an actual transaction attribute.
@@ -95,6 +102,7 @@ public abstract class AbstractFallbackTransactionAttributeSource implements Tran
 			}
 		}
 		else {
+			// 缓存中没有事务标签
 			// We need to work it out.
 			TransactionAttribute txAtt = computeTransactionAttribute(method, targetClass);
 			// Put it in the cache.
@@ -127,6 +135,11 @@ public abstract class AbstractFallbackTransactionAttributeSource implements Tran
 	 * Same signature as {@link #getTransactionAttribute}, but doesn't cache the result.
 	 * {@link #getTransactionAttribute} is effectively a caching decorator for this method.
 	 * @see #getTransactionAttribute
+	 *
+	 * 提取事务标签
+	 * 如果方法中存在事务，则使用方法中的事务，否则使用方法所在类上的属性，
+	 * 如果方法所在类的属性上，还是没有搜寻到对应的事务属性，那么再寻找接口中的方法，
+	 * 再没有的话，最后尝试搜寻接口的类上面的声明。
 	 */
 	private TransactionAttribute computeTransactionAttribute(Method method, Class<?> targetClass) {
 		// Don't allow no-public methods as required.
@@ -136,33 +149,48 @@ public abstract class AbstractFallbackTransactionAttributeSource implements Tran
 
 		// Ignore CGLIB subclasses - introspect the actual user class.
 		Class<?> userClass = ClassUtils.getUserClass(targetClass);
+
 		// The method may be on an interface, but we need attributes from the target class.
 		// If the target class is null, the method will be unchanged.
+
+		// method 代表接口中的方法，specificMethod 代表实现类中的方法
 		Method specificMethod = ClassUtils.getMostSpecificMethod(method, userClass);
+
 		// If we are dealing with method with generic parameters, find the original method.
 		specificMethod = BridgeMethodResolver.findBridgedMethod(specificMethod);
 
 		// First try is the method in the target class.
+		// 1.查看方法中是否存在事务声明
 		TransactionAttribute txAtt = findTransactionAttribute(specificMethod);
 		if (txAtt != null) {
+			//如果有则返回
 			return txAtt;
 		}
 
 		// Second try is the transaction attribute on the target class.
+		// 2.查看方法所在类中是否存在方法声明
 		txAtt = findTransactionAttribute(specificMethod.getDeclaringClass());
 		if (txAtt != null) {
+			//如果有则返回
 			return txAtt;
 		}
 
+		// 如果存在接口，则到接口中去寻找
 		if (specificMethod != method) {
+
 			// Fallback is to look at the original method.
+			// 3.查看接口方法
 			txAtt = findTransactionAttribute(method);
 			if (txAtt != null) {
+				// 如果有则返回
 				return txAtt;
 			}
+
 			// Last fallback is the class of the original method.
+			// 4.到接口中的类去寻找
 			return findTransactionAttribute(method.getDeclaringClass());
 		}
+
 		return null;
 	}
 
@@ -182,6 +210,8 @@ public abstract class AbstractFallbackTransactionAttributeSource implements Tran
 	 * @param clazz the class to retrieve the attribute for
 	 * @return all transaction attribute associated with this class
 	 * (or <code>null</code> if none)
+	 *
+	 * 提取事务标签
 	 */
 	protected abstract TransactionAttribute findTransactionAttribute(Class<?> clazz);
 

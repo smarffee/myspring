@@ -107,6 +107,7 @@ public class ReflectiveAspectJAdvisorFactory extends AbstractAspectJAdvisorFacto
 
 		final List<Advisor> advisors = new LinkedList<Advisor>();
 
+		//获取除了被@Pointcut 标记以外的方法，
 		for (Method method : getAdvisorMethods(aspectClass)) {
 			//1.完成了对增强器的获取(获取注解并根据注解生成增强)
 			Advisor advisor = getAdvisor(method, lazySingletonAspectInstanceFactory, advisors.size(), aspectName);

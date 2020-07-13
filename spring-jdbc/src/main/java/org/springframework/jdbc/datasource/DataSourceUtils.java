@@ -151,6 +151,9 @@ public abstract class DataSourceUtils {
 	 * @return the previous isolation level, if any
 	 * @throws SQLException if thrown by JDBC methods
 	 * @see #resetConnectionAfterTransaction
+	 *
+	 * 用于负责对底层数据库连接的设置，当然，只是包含只读标识和隔离级别的设置。
+	 * 由于强大的日志及日常处理，显得函数代码量比较大，但是但从业务角度去看，关键代码其实不多。
 	 */
 	public static Integer prepareConnectionForTransaction(Connection con, TransactionDefinition definition)
 			throws SQLException {
@@ -158,6 +161,7 @@ public abstract class DataSourceUtils {
 		Assert.notNull(con, "No Connection specified");
 
 		// Set read-only flag.
+		// 设置数据连接只读标识
 		if (definition != null && definition.isReadOnly()) {
 			try {
 				if (logger.isDebugEnabled()) {
@@ -192,6 +196,7 @@ public abstract class DataSourceUtils {
 		}
 
 		// Apply specific isolation level, if any.
+		// 设置数据库连接的隔离级别
 		Integer previousIsolationLevel = null;
 		if (definition != null && definition.getIsolationLevel() != TransactionDefinition.ISOLATION_DEFAULT) {
 			if (logger.isDebugEnabled()) {
@@ -307,6 +312,7 @@ public abstract class DataSourceUtils {
 	 */
 	public static void releaseConnection(Connection con, DataSource dataSource) {
 		try {
+			// 释放数据库连接:
 			doReleaseConnection(con, dataSource);
 		}
 		catch (SQLException ex) {

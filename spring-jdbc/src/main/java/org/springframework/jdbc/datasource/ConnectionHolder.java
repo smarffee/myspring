@@ -47,6 +47,7 @@ public class ConnectionHolder extends ResourceHolderSupport {
 
 	private Connection currentConnection;
 
+	// 判断当前线程是否存在事务的依据
 	private boolean transactionActive = false;
 
 	private Boolean savepointsSupported;

@@ -123,6 +123,8 @@ public abstract class JdbcTransactionObjectSupport implements SavepointManager, 
 	/**
 	 * This implementation rolls back to the given JDBC 3.0 Savepoint.
 	 * @see java.sql.Connection#rollback(java.sql.Savepoint)
+	 *
+	 * 退回到保存点
 	 */
 	public void rollbackToSavepoint(Object savepoint) throws TransactionException {
 		try {

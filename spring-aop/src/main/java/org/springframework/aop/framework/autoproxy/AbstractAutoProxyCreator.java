@@ -135,14 +135,21 @@ public abstract class AbstractAutoProxyCreator extends ProxyConfig
 
 	private BeanFactory beanFactory;
 
+	/** key:全类名_beanName ; value:是否需要增强 **/
 	private final Map<Object, Boolean> advisedBeans = new ConcurrentHashMap<Object, Boolean>(64);
 
 	// using a ConcurrentHashMap as a Set
 	private final Map<String, Boolean> targetSourcedBeans = new ConcurrentHashMap<String, Boolean>(16);
 
 	// using a ConcurrentHashMap as a Set
+	// 解决循环依赖时从 ObjectFactory
+	/**
+	 * key: catchKey {@link AbstractAutoProxyCreator#getCacheKey(java.lang.Class, java.lang.String)}
+	 * value: 是否是解决循环依赖时创建创建的代理
+ 	 */
 	private final Map<Object, Boolean> earlyProxyReferences = new ConcurrentHashMap<Object, Boolean>(16);
 
+	// 代理类的Class
 	private final Map<Object, Class<?>> proxyTypes = new ConcurrentHashMap<Object, Class<?>>(16);
 
 
@@ -271,10 +278,14 @@ public abstract class AbstractAutoProxyCreator extends ProxyConfig
 		Object cacheKey = getCacheKey(beanClass, beanName);
 
 		if (!this.targetSourcedBeans.containsKey(beanName)) {
+			// 已经处理过
 			if (this.advisedBeans.containsKey(cacheKey)) {
 				return null;
 			}
+
+			//给定的bean 类是否代表一个基础设施类，基础设施类不应代理，或者配置了指定bean 不需要自动代理
 			if (isInfrastructureClass(beanClass) || shouldSkip(beanClass, beanName)) {
+				// 不需要增强
 				this.advisedBeans.put(cacheKey, Boolean.FALSE);
 				return null;
 			}
@@ -459,11 +470,11 @@ public abstract class AbstractAutoProxyCreator extends ProxyConfig
 
 	/**
 	 * Create an AOP proxy for the given bean.
-	 * @param beanClass the class of the bean
-	 * @param beanName the name of the bean
-	 * @param specificInterceptors the set of interceptors that is
+	 * @param beanClass the class of the bean 要代理的类class
+	 * @param beanName the name of the bean 要代理的类实例beanName
+	 * @param specificInterceptors the set of interceptors that is 增强器集合
 	 * specific to this bean (may be empty, but not null)
-	 * @param targetSource the TargetSource for the proxy,
+	 * @param targetSource the TargetSource for the proxy, 要代理的类实例
 	 * already pre-configured to access the bean
 	 * @return the AOP proxy for the bean
 	 * @see #buildAdvisors

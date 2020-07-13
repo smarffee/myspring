@@ -49,6 +49,8 @@ import org.springframework.transaction.support.TransactionCallback;
  * @see TransactionProxyFactoryBean
  * @see org.springframework.aop.framework.ProxyFactoryBean
  * @see org.springframework.aop.framework.ProxyFactory
+ *
+ * 事务拦截器
  */
 @SuppressWarnings("serial")
 public class TransactionInterceptor extends TransactionAspectSupport implements MethodInterceptor, Serializable {
@@ -95,34 +97,52 @@ public class TransactionInterceptor extends TransactionAspectSupport implements 
 		Class<?> targetClass = (invocation.getThis() != null ? AopUtils.getTargetClass(invocation.getThis()) : null);
 
 		// If the transaction attribute is null, the method is non-transactional.
+		// 1.获取对应事务属性（最基础，最首要的工作）
 		final TransactionAttribute txAttr =
 				getTransactionAttributeSource().getTransactionAttribute(invocation.getMethod(), targetClass);
+
+		// 2.从获取 beanFactory 中 获取配置的 transactionManager
 		final PlatformTransactionManager tm = determineTransactionManager(txAttr);
+
+		// 构造方法唯一标识（类、方法、如service.UserServiceImpl.save()方法）
 		final String joinpointIdentification = methodIdentification(invocation.getMethod(), targetClass);
 
+		// 声明式事务处理
 		if (txAttr == null || !(tm instanceof CallbackPreferringPlatformTransactionManager)) {
 			// Standard transaction demarcation with getTransaction and commit/rollback calls.
+			// 3.创建 TransactionInfo。在目标方法执行前，获取事务，并收集事务信息。
+			// 事务信息和事务属性，并不相同。也就是 TransactionInfo 和 TransactionAttribute 并不相同，
+			// TransactionInfo 中包含 TransactionAttribute 信息，
+			// 但是，除了TransactionAttribute 外，还有其他事务信息，例如 PlatformTransactionManager 以及 TransactionStatus
 			TransactionInfo txInfo = createTransactionIfNecessary(tm, txAttr, joinpointIdentification);
 			Object retVal = null;
 			try {
 				// This is an around advice: Invoke the next interceptor in the chain.
 				// This will normally result in a target object being invoked.
+				// 4. 执行被增强方法（即被 @Transactional 标记的方法）
 				retVal = invocation.proceed();
 			}
 			catch (Throwable ex) {
 				// target invocation exception
+				// 5.异常回滚
+				// 一旦出现异常，尝试异常处理。
+				// 并不是所有异常，Spring都会将其回滚，默认只对 RuntimeException 回滚
 				completeTransactionAfterThrowing(txInfo, ex);
 				throw ex;
 			}
 			finally {
+				// 6.提交事务前的事务信息清除
 				cleanupTransactionInfo(txInfo);
 			}
+
+			// 7.提交事务
 			commitTransactionAfterReturning(txInfo);
 			return retVal;
 		}
 
 		else {
 			// It's a CallbackPreferringPlatformTransactionManager: pass a TransactionCallback in.
+			// 编程式事务
 			try {
 				Object result = ((CallbackPreferringPlatformTransactionManager) tm).execute(txAttr,
 						new TransactionCallback<Object>() {

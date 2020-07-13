@@ -57,6 +57,7 @@ public class AnnotationTransactionAttributeSource extends AbstractFallbackTransa
 
 	private final boolean publicMethodsOnly;
 
+	// 初始化的时候初始化的
 	private final Set<TransactionAnnotationParser> annotationParsers;
 
 
@@ -125,6 +126,7 @@ public class AnnotationTransactionAttributeSource extends AbstractFallbackTransa
 		return determineTransactionAttribute(method);
 	}
 
+	// 提取事务标签
 	@Override
 	protected TransactionAttribute findTransactionAttribute(Class<?> clazz) {
 		return determineTransactionAttribute(clazz);
@@ -140,6 +142,8 @@ public class AnnotationTransactionAttributeSource extends AbstractFallbackTransa
 	 * @param ae the annotated method or class
 	 * @return TransactionAttribute the configured transaction attribute,
 	 * or <code>null</code> if none was found
+	 *
+	 * 提取事务标签
 	 */
 	protected TransactionAttribute determineTransactionAttribute(AnnotatedElement ae) {
 		for (TransactionAnnotationParser annotationParser : this.annotationParsers) {

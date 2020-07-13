@@ -89,6 +89,8 @@ public class DefaultTransactionAttribute extends DefaultTransactionDefinition im
 	 * The default behavior is as with EJB: rollback on unchecked exception.
 	 * Additionally attempt to rollback on Error.
 	 * <p>This is consistent with TransactionTemplate's default behavior.
+	 *
+	 * 默认的抛出异常事务回滚条件
 	 */
 	public boolean rollbackOn(Throwable ex) {
 		return (ex instanceof RuntimeException || ex instanceof Error);

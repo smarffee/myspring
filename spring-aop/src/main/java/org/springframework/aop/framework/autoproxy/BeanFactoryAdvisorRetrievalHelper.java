@@ -43,6 +43,7 @@ public class BeanFactoryAdvisorRetrievalHelper {
 
 	private final ConfigurableListableBeanFactory beanFactory;
 
+	// 增强器beanName 缓存
 	private String[] cachedAdvisorBeanNames;
 
 
@@ -62,7 +63,7 @@ public class BeanFactoryAdvisorRetrievalHelper {
 	 * @return the list of {@link org.springframework.aop.Advisor} beans
 	 * @see #isEligibleBean
 	 *
-	 * 从配置文件中获取定义的增强
+	 * 从配置文件中获取定义的增强，比如事务
 	 */
 	public List<Advisor> findAdvisorBeans() {
 		// Determine list of advisor bean names, if not cached already.
@@ -72,6 +73,7 @@ public class BeanFactoryAdvisorRetrievalHelper {
 			if (advisorNames == null) {
 				// Do not initialize FactoryBeans here: We need to leave all regular beans
 				// uninitialized to let the auto-proxy creator apply to them!
+				// 获取所有 Advisor 类型的 beanName
 				advisorNames = BeanFactoryUtils.beanNamesForTypeIncludingAncestors(
 						this.beanFactory, Advisor.class, true, false);
 				this.cachedAdvisorBeanNames = advisorNames;

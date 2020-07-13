@@ -44,6 +44,8 @@ public interface TransactionAnnotationParser {
 	 * @return TransactionAttribute the configured transaction attribute,
 	 * or <code>null</code> if none was found
 	 * @see AnnotationTransactionAttributeSource#determineTransactionAttribute
+	 *
+	 * 提取事务标签
 	 */
 	TransactionAttribute parseTransactionAnnotation(AnnotatedElement ae);
 

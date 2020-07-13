@@ -58,6 +58,7 @@ public class DefaultTransactionStatus extends AbstractTransactionStatus {
 
 	private final boolean debug;
 
+	// 挂起的事务
 	private final Object suspendedResources;
 
 

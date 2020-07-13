@@ -20,6 +20,7 @@ import java.beans.PropertyDescriptor;
 
 import org.springframework.beans.BeansException;
 import org.springframework.beans.PropertyValues;
+import org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory;
 
 /**
  * Subinterface of {@link BeanPostProcessor} that adds a before-instantiation callback,
@@ -65,6 +66,11 @@ public interface InstantiationAwareBeanPostProcessor extends BeanPostProcessor {
 	 * @throws org.springframework.beans.BeansException in case of errors
 	 * @see org.springframework.beans.factory.support.AbstractBeanDefinition#hasBeanClass
 	 * @see org.springframework.beans.factory.support.AbstractBeanDefinition#getFactoryMethodName
+	 *
+	 *
+	 * 实例化之前，也就是构造器调用之前，执行此此方法
+	 * 直接调用: {@link AbstractAutowireCapableBeanFactory#applyBeanPostProcessorsBeforeInstantiation(java.lang.Class, java.lang.String)}
+	 * 间接调用: {@link AbstractAutowireCapableBeanFactory#resolveBeforeInstantiation(java.lang.String, org.springframework.beans.factory.support.RootBeanDefinition)}
 	 */
 	Object postProcessBeforeInstantiation(Class<?> beanClass, String beanName) throws BeansException;
 
@@ -81,6 +87,9 @@ public interface InstantiationAwareBeanPostProcessor extends BeanPostProcessor {
 	 * Returning <code>false</code> will also prevent any subsequent InstantiationAwareBeanPostProcessor
 	 * instances being invoked on this bean instance.
 	 * @throws org.springframework.beans.BeansException in case of errors
+	 *
+	 * 实例化之后，也就是构造器调用之后，属性值获取到之前，填充属性之前(步骤1)，执行此方法
+	 * 调用位置: {@link AbstractAutowireCapableBeanFactory#populateBean(java.lang.String, org.springframework.beans.factory.support.RootBeanDefinition, org.springframework.beans.BeanWrapper)}
 	 */
 	boolean postProcessAfterInstantiation(Object bean, String beanName) throws BeansException;
 
@@ -101,6 +110,9 @@ public interface InstantiationAwareBeanPostProcessor extends BeanPostProcessor {
 	 * to skip property population
 	 * @throws org.springframework.beans.BeansException in case of errors
 	 * @see org.springframework.beans.MutablePropertyValues
+	 *
+	 * 实例化之后，也就是构造器调用之后，属性值获取到之前，填充属性之后(步骤3)，执行此方法
+	 * 调用位置: {@link AbstractAutowireCapableBeanFactory#populateBean(java.lang.String, org.springframework.beans.factory.support.RootBeanDefinition, org.springframework.beans.BeanWrapper)}
 	 */
 	PropertyValues postProcessPropertyValues(
 			PropertyValues pvs, PropertyDescriptor[] pds, Object bean, String beanName)

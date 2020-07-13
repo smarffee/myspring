@@ -52,14 +52,14 @@ public class DefaultAopProxyFactory implements AopProxyFactory, Serializable {
 		/**
 		 * 3个方面影响着Spring在创建代理时，使用JDK 还是 CGLIB
 		 *
-		 * optimize: 用来控制通过CGLIB创建的代理，是否使用激进的优化策略。
+		 * 1.optimize: 用来控制通过CGLIB创建的代理，是否使用激进的优化策略。
 		 * 除非完全了解AOP代理如果处理优化，否则不推荐用户使用这个设置，
 		 * 目前这个属性仅用于CGLIB 代理，对于JDK 动态代理（缺省代理）无效。
 		 *
-		 * proxyTargetClass：这个属性为true时，目标类本身被代理而不是目标类的接口。
+		 * 2.proxyTargetClass：这个属性为true时，目标类本身被代理而不是目标类的接口。
 		 * 如果这个属性值被设为true，CGLIB代理将被创建，设置方式为：<aop:aspectj-autoproxy proxy-target-class="true"/>
 		 *
-		 * hasNoUserSuppliedProxyInterfaces：是否存在代理接口
+		 * 3.hasNoUserSuppliedProxyInterfaces：是否存在代理接口
 		 *
 		 * 下面是 JDK 与 cglib 方式的总结：
 		 * 1. 如果目标对象实现了接口，默认情况下会采用jdk 的动态代理实现aop

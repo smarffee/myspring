@@ -141,11 +141,19 @@ public abstract class AbstractTransactionStatus implements TransactionStatus {
 
 	/**
 	 * Roll back to the savepoint that is held for the transaction.
+	 *
+	 * 如果有保存点, 也就是当前事务为单独的线程, 则会退到保存点
+	 * 其实是根据底层的数据库连接进行的.
 	 */
 	public void rollbackToHeldSavepoint() throws TransactionException {
 		if (!hasSavepoint()) {
 			throw new TransactionUsageException("No savepoint associated with current transaction");
 		}
+		/**
+		 * 这里使用的是 jdbc 的方式进行数据库连接, 那么 getSavepointManager() 方法返回的是 JdbcTransactionObjectSupport,
+		 * 也就是说, 会调用
+		 * {@link org.springframework.jdbc.datasource.JdbcTransactionObjectSupport#rollbackToSavepoint(java.lang.Object)}
+		 */
 		getSavepointManager().rollbackToSavepoint(getSavepoint());
 		setSavepoint(null);
 	}

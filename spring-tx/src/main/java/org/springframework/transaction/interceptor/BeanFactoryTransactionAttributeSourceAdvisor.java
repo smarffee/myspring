@@ -29,6 +29,8 @@ import org.springframework.aop.support.AbstractBeanFactoryPointcutAdvisor;
  * @see #setAdviceBeanName
  * @see TransactionInterceptor
  * @see TransactionAttributeSourceAdvisor
+ *
+ * 事务的切面类
  */
 public class BeanFactoryTransactionAttributeSourceAdvisor extends AbstractBeanFactoryPointcutAdvisor {
 

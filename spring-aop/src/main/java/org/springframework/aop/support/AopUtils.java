@@ -217,13 +217,20 @@ public abstract class AopUtils {
 			introductionAwareMethodMatcher = (IntroductionAwareMethodMatcher) methodMatcher;
 		}
 
+		// 获取当前targetClass 所有的接口Class，
 		Set<Class> classes = new HashSet<Class>(ClassUtils.getAllInterfacesForClassAsSet(targetClass));
+		// 将当前类也加入其中
 		classes.add(targetClass);
+
+		// targetClass的接口和 targetClass 一起遍历
 		for (Class<?> clazz : classes) {
+			// 获取所有的方法
 			Method[] methods = clazz.getMethods();
+			// 遍历方法
 			for (Method method : methods) {
 				if ((introductionAwareMethodMatcher != null &&
 						introductionAwareMethodMatcher.matches(method, targetClass, hasIntroductions)) ||
+						// 匹配Pointcut，一旦匹配成功，便认为 targetClass 适用于当前增强器
 						methodMatcher.matches(method, targetClass)) {
 					return true;
 				}
@@ -297,6 +304,10 @@ public abstract class AopUtils {
 		}
 
 		boolean hasIntroductions = !eligibleAdvisors.isEmpty();
+		/**
+		 * 对于Spring事务，candidate 为
+		 * {@link org.springframework.transaction.interceptor.BeanFactoryTransactionAttributeSourceAdvisor}
+ 		 */
 		for (Advisor candidate : candidateAdvisors) {
 			//引介增强已处理
 			if (candidate instanceof IntroductionAdvisor) {
