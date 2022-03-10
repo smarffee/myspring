@@ -1,0 +1,2 @@
+
+mvn install:install-file -Dfile=uow-6.0.2.17.jar -DgroupId=com.ibm.websphere -DartifactId=uow -Dversion=6.0.2.17 -Dpackaging=jar
